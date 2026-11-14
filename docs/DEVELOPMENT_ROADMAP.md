@@ -7,7 +7,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 0 | Repository audit, architecture, schema, threat model, roadmap, cost model | **Done (14 Nov 2026)** |
 | 1 | SaaS foundation: tenants, users, RBAC, auth, sessions, MFA, API keys, RLS, audit, config | **Done (14 Nov 2026)** |
 | 2 | Discovery: source registry, safe fetch (SSRF), RSS + search adapter interface, dedupe, clustering, hourly scheduler, quotas, job history | **Done — verified in CI (14 Nov 2026)** |
-| 3 | Research & evidence: article retrieval (robots.txt), grounded claim extraction, corroboration, conflict detection, rule-based statuses, evidence review API, usage ledger | **Done — awaiting review** |
+| 3 | Research & evidence: article retrieval (robots.txt), grounded claim extraction, corroboration, conflict detection, rule-based statuses, evidence review API, usage ledger | **Done — verified in CI (14 Nov 2026), awaiting review** |
 | 4 | AI gateway (free-tier first: Gemini, Groq, OpenRouter; plus OpenAI, Anthropic), two-angle **English** generation, SEO/social fields, versioning, usage accounting. Nepali + consistency checks when enabled | |
 | 5 | Visuals: licensed image adapters, licence records, storage, optimisation, AI illustrations, charts | |
 | 6 | Newsroom dashboard (Next.js, ne/en UI) | |
