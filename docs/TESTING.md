@@ -44,6 +44,8 @@ The first CI run (commit `5bcc45a`) failed and exposed two real defects the sand
 | `pytest` (Phases 1–4) | **162 passed**, 3 skipped (live checks, run in CI), 96% coverage |
 | `ruff` / `mypy` | clean / no issues (53 files) |
 | Migration `0004` up → down → up, `alembic check` | clean, no drift |
+| GitHub CI run 43615729736 (commit `1784189`) | **all green: 165 passed** incl. live RSS fetch, live Gemini extraction and live Gemini writing |
+| Live Gemini draft (gemini-flash-lite-latest, 515 in / 460 out tokens) | Headline "Saptari Floods Displace 2,000 Families"; both paragraphs cite claims; SEO within limits; one `single_source_claim` flag. Observed: the model stated the single-source relief claim without "according to" and the summary implied a causal link ("prompting") not in the claims — both are why human review stays mandatory |
 
 Phase 4 coverage: two distinct angles with citations and limits; no B without distinct evidence; B discarded when repeating A; plan rejected when B reuses A's claims; fabrication flags (invented death toll, headline figure, uncited paragraph, unknown claim ID, invented quote); conflicting-claim flag; eligibility gate; no AI / quota failure / retry / idempotency / already-written; unique slugs; versions immutable in the DB; API: view, edit with re-check and history, unknown claim IDs rejected, regeneration limit, reject, role permissions, API keys blocked as non-human, tenant isolation, eligibility on manual write; worker and hourly schedule.
 
