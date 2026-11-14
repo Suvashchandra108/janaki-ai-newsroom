@@ -61,6 +61,12 @@ Settings are applied with `set_config(..., true)` (transaction-local), so a pool
 | `articles` | `event_id`, `angle` (straight/context), `language`, `slug` (unique per tenant), `status` (draft/needs_review/rejected/delivered), `current_version`, `regenerations`, `rejection_reason` | Yes | One per event × angle × language |
 | `article_versions` | `article_id`, `version`, `headline`, `alt_headline`, `summary`, `paragraphs` jsonb (text + claim_ids), `image_caption`, `seo_title` (≤70), `seo_description` (≤170), `keywords[]`, `category`, `location`, `social` jsonb, `flags` jsonb, `attribution`, `created_by_kind` (ai/user), `created_by_user`, `model`, `note` | Yes | Immutable: app role has INSERT/SELECT only |
 
+## 3e. Phase 5 table (implemented — migration `0005_media_assets`)
+
+| Table | Key columns | RLS | Notes |
+|---|---|---|---|
+| `media_assets` | `event_id`, `article_id`, `role` (hero/inline), `kind` (photo/illustration/chart), `status` (candidate/selected/rejected), provenance (`provider`, `source_page_url`, `original_url`, `title`, `creator`, `credit`, `retrieved_at`), licence (`licence_name`, `licence_url`, `attribution_required`, `attribution_text`, `commercial_use`, `modification_allowed`, `restrictions[]`, `publishable`, `licence_notes`), `ai_generated`, `label`, `chart_spec`, file (`mime`, `width`, `height`, `sha256`, `storage_key`, `derivatives`, `processing_history`), `caption`, `selected_by/at` | Yes | CHECKs: publishable needs licence URL + commercial use + attribution (own charts/AI exempt); AI ⇒ illustration with label; selected ⇒ publishable |
+
 ## 4. Full planned entity–relationship diagram
 
 ```mermaid

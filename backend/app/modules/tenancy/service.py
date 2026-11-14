@@ -20,7 +20,7 @@ DEFAULT_TENANT_SETTINGS = {
     "languages": ["en"],
     "timezone": "Asia/Kathmandu",
     "discovery": {"interval_minutes": 60, "daily_item_quota": 100, "paused": False},
-    "generation": {"daily_event_cap": 10, "max_regenerations": 3},
+    "generation": {"daily_event_cap": 10, "max_regenerations": 3, "max_illustrations_per_day": 3},
     "attribution": {"ai_assisted_label": True},
 }
 

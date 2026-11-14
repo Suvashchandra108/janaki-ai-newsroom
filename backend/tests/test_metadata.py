@@ -24,6 +24,7 @@ EXPECTED_TABLES = {
     "usage_records",
     "articles",
     "article_versions",
+    "media_assets",
 }
 
 

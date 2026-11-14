@@ -88,6 +88,18 @@ Common codes: `unauthorized`, `invalid_credentials`, `mfa_required`, `invalid_mf
 
 There is no approve/publish endpoint: approval and publication happen in the website CMS.
 
+## Phase 5 endpoints (implemented)
+
+| Method & path | Permission | Purpose |
+|---|---|---|
+| GET `/events/{id}/media` | `articles.read` | Candidates and selections with provenance, licence and publishable flag |
+| POST `/events/{id}/media/search` | `media.manage` | `{query?}` search Wikimedia Commons; creates candidates (no download yet) |
+| POST `/media/{id}/select` | `media.manage`, human only | `{article_id?, role, caption?}` — downloads, processes, stores; 409 if not publishable |
+| POST `/media/{id}/reject` | `media.manage`, human only | |
+| POST `/events/{id}/media/chart` | `media.manage` | Bar chart from verified figures (422 if not enough data) |
+| POST `/events/{id}/media/illustration` | `media.manage`, human only | AI illustration (503 until a provider is configured; 409 while usable photos exist; 429 over daily limit) |
+| GET `/media/{id}/files/{name}` | `articles.read` | Source copy or derivative (`w800.webp` …), own organisation only |
+
 Platform admins deliberately have **no** access to tenant newsroom data through tenant endpoints.
 
 ## Example
@@ -99,4 +111,4 @@ curl -s -X POST localhost:8000/api/v1/auth/login -H 'Content-Type: application/j
 
 ## Planned endpoint groups
 
-`/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
+`/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).

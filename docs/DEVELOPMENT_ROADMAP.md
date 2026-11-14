@@ -9,7 +9,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 2 | Discovery: source registry, safe fetch (SSRF), RSS + search adapter interface, dedupe, clustering, hourly scheduler, quotas, job history | **Done — verified in CI (14 Nov 2026)** |
 | 3 | Research & evidence: article retrieval (robots.txt), grounded claim extraction, corroboration, conflict detection, rule-based statuses, evidence review API, usage ledger | **Done — verified in CI (14 Nov 2026), awaiting review** |
 | 4 | Two-angle **English** writing from checked claims, paragraph citations, fabrication flags, SEO/social fields, immutable versions, editor edit/regenerate/reject, usage accounting. Nepali + consistency checks when enabled | **Done — awaiting review** |
-| 5 | Visuals: licensed image adapters, licence records, storage, optimisation, AI illustrations, charts | |
+| 5 | Visuals: Wikimedia Commons (licence-first), licence classifier, DB-enforced publishable rules, safe download, Pillow derivatives, local/S3 storage, charts from verified figures, AI-illustration interface with mandatory label, editor selection | **Done — awaiting review** |
 | 6 | Newsroom dashboard (Next.js, ne/en UI) | |
 | 7 | **CMS connector** to the existing JanakiTelevision website (Payload CMS): deliver English drafts as unpublished `draft` articles via a reporter-level bot account; idempotent delivery; status sync back (decision 14 Nov 2026 — replaces building a new CMS) | |
 | 8 | SaaS commercial: onboarding, plans, metering, quota enforcement, billing adapter, rate limiting | |
@@ -26,9 +26,16 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 
 ## Next steps
 
-**Phase 5 — visuals (next):** Wikimedia Commons adapter with licence metadata (commercial use, attribution, licence URL), publishable flag computed from licence fields, image optimisation and storage, AI-illustration adapter with mandatory label, charts only from verified claim numbers.
+**Phase 7 — delivery to the JanakiTelevision CMS (next, by owner's choice of order: 5 then 7).** Bot user with draft-only rights and API key on the website side; newsroom connector that creates `draft` articles (aiAssisted, editorialNotes with sources and claim status) plus the selected hero image with caption and credit; idempotent delivery and status sync back.
 
-**Alternative order to consider:** Phase 7 (delivery of drafts into the JanakiTelevision CMS) could come before visuals, so editors start reviewing real drafts in their own CMS sooner. Needs website-side changes (bot user with API key) in the JanakiTelevision repo.
+## Phase 5 notes
+
+- Licence-first: Wikimedia Commons only for now. Commercial stock providers need accounts and contracts (decision for the owner).
+- Publishable = recognised licence + commercial use + modification (resizing) allowed + licence URL + attribution text when required. Enforced again by database CHECK constraints; selection requires publishable (also a constraint).
+- Download happens only when an editor selects an image; the ~1600px rendition is fetched, never the full original. Source copy kept; WebP derivatives are proportional resizes with metadata stripped.
+- Charts: bar charts only, from ≥2 corroborated/editor-verified figures in the same unit, with sources, date and methodology on the image; SVG labels escaped.
+- AI illustrations: interface, prompt rules (place and section only, no people, no text) and labelling are built and DB-enforced; **no image-generation provider is configured** (API returns 503). Daily limit default 3; only after licensed photos have been reviewed.
+- Restrictions from Commons (e.g. personality rights) are shown to editors but do not block use.
 
 ## Phase 4 notes
 

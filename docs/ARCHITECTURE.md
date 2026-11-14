@@ -1,6 +1,6 @@
 # Architecture — Janaki AI Newsroom
 
-Status: **Phases 0–4 implemented** (English-first; Nepali later). Drafts will be delivered to the existing JanakiTelevision CMS (Phase 7). Sections marked *(planned)* are not yet built.
+Status: **Phases 0–5 implemented** (English-first; Nepali later). Drafts will be delivered to the existing JanakiTelevision CMS (Phase 7). Sections marked *(planned)* are not yet built.
 
 ## 1. Current-state assessment (Phase 0 audit)
 
@@ -47,7 +47,7 @@ flowchart LR
       DISC[discovery]
       RES[research & evidence]
       EDT[editorial AI]
-      VIS[visual intelligence*]
+      VIS[visual intelligence]
       CMS[CMS & publishing*]
       USE[usage & billing*]
     end
@@ -144,7 +144,7 @@ janaki-ai-newsroom/
 │   │       ├── research/       # Phase 3: documents, grounded claims, rules, jobs
 │   │       ├── editorial/      # Phase 4: angle plan, cited English drafts, versions
 │   │       ├── ai_gateway/     # Phase 3: Gemini + OpenAI-compatible adapters, usage ledger
-│   │       ├── visuals/        # Phase 5 (planned)
+│   │       ├── visuals/        # Phase 5: Commons, licences, processing, storage, charts
 │   │       ├── cms/            # Phase 7 (planned)
 │   │       └── billing/        # Phase 8 (planned)
 │   ├── scripts/                # bootstrap platform admin, seed Janaki TV

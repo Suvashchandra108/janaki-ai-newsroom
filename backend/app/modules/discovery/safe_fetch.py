@@ -165,12 +165,18 @@ class SafeFetcher:
     def close(self) -> None:
         self._pool.close()
 
-    def fetch(self, url: str, allowed_domains: Iterable[str]) -> FetchResult:
+    def fetch(
+        self,
+        url: str,
+        allowed_domains: Iterable[str],
+        content_types: Iterable[str] = ALLOWED_CONTENT_TYPES,
+        max_bytes: int | None = None,
+    ) -> FetchResult:
         allowed = [normalise_domain(d) for d in allowed_domains]
         current = url
         for _ in range(self.max_redirects + 1):
             validate_url(current, allowed, self.allowed_ports)
-            status, headers, body = self._request(current)
+            status, headers, body = self._request(current, max_bytes or self.max_bytes)
             if status in (301, 302, 303, 307, 308):
                 location = headers.get("location")
                 if not location:
@@ -180,14 +186,14 @@ class SafeFetcher:
             if status >= 400:
                 raise FetchError("http_status", f"HTTP {status}", status=status)
             ctype = headers.get("content-type", "").lower()
-            if not any(t in ctype for t in ALLOWED_CONTENT_TYPES):
+            if not any(t in ctype for t in content_types):
                 raise FetchError("bad_content_type", f"Unexpected content type: {ctype[:80]}")
             return FetchResult(
                 url=url, final_url=current, status=status, content_type=ctype, body=body
             )
         raise FetchError("too_many_redirects", "Too many redirects")
 
-    def _request(self, url: str) -> tuple[int, dict[str, str], bytes]:
+    def _request(self, url: str, max_bytes: int) -> tuple[int, dict[str, str], bytes]:
         timeout = {
             "connect": self.timeout,
             "read": self.timeout,
@@ -209,14 +215,14 @@ class SafeFetcher:
             ) as resp:
                 hdrs = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in resp.headers}
                 length = hdrs.get("content-length", "")
-                if length.isdigit() and int(length) > self.max_bytes:
+                if length.isdigit() and int(length) > max_bytes:
                     raise FetchError("too_large", "Response exceeds size limit")
                 chunks: list[bytes] = []
                 size = 0
                 if resp.status < 300 or resp.status >= 400:
                     for chunk in resp.iter_stream():
                         size += len(chunk)
-                        if size > self.max_bytes:
+                        if size > max_bytes:
                             raise FetchError("too_large", "Response exceeds size limit")
                         chunks.append(chunk)
                 return resp.status, hdrs, b"".join(chunks)

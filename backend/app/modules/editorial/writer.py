@@ -8,7 +8,10 @@ by fixed rules; anything the evidence does not support is flagged for the editor
 * unsupported_number  — a figure that appears in none of the cited claims;
 * unverified_quote    — quoted words that appear in no cited source excerpt;
 * conflicting_claim   — the paragraph relies on a claim publishers disagree about;
-* single_source_claim — the paragraph relies on a claim only one publisher reports.
+* single_source_claim — relies on a claim only one publisher reports (warning if the text
+  does not attribute it, e.g. "according to ...");
+* unsupported_causal_link — cause-and-effect wording ("prompting", "led to" ...) that no
+  cited source contains.
 """
 
 from __future__ import annotations
@@ -188,6 +191,14 @@ class Draft:
     flags: list[dict[str, Any]] = field(default_factory=list)
 
 
+_ATTRIB_RE = re.compile(
+    r"\b(according to|reported|reports|said|says|told|stated|announced|claimed|cited)\b", re.I
+)
+_CAUSAL_RE = re.compile(
+    r"\b(prompting|prompted|led to|leading to|resulted in|resulting in|because of|due to|"
+    r"caused|causing|as a result|in response to|triggered|sparked)\b",
+    re.I,
+)
 _NUM_RE = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?")
 _QUOTE_RE = re.compile(r"[\"“]([^\"”]{12,})[\"”]")
 
@@ -275,13 +286,31 @@ def check_text(
                     }
                 )
             elif c.status == "insufficient":
+                attributed = bool(_ATTRIB_RE.search(p["text"]))
                 flags.append(
                     {
                         "code": "single_source_claim",
                         "paragraph": i,
-                        "severity": "info",
+                        "severity": "info" if attributed else "warning",
                         "message": f"Only {', '.join(c.publishers) or 'one publisher'} "
-                        f"reports: {c.text[:120]}",
+                        f"reports: {c.text[:120]}"
+                        + ("" if attributed else " — not attributed in the text"),
+                    }
+                )
+    cited_text = " ".join(
+        _norm(t) for c in (all_cited or list(by_id.values())) for t in (c.text, *c.excerpts)
+    )
+    texts = [(f"paragraph {i}", p["text"]) for i, p in enumerate(paragraphs)]
+    texts += list((extra or {}).items())
+    for where, value in texts:
+        for m in _CAUSAL_RE.finditer(value):
+            if m.group(0).lower() not in cited_text:
+                flags.append(
+                    {
+                        "code": "unsupported_causal_link",
+                        "field": where,
+                        "severity": "warning",
+                        "message": f"'{m.group(0)}' links events in a way no cited source states",
                     }
                 )
     evidence = _evidence_numbers(all_cited if all_cited else list(by_id.values()))

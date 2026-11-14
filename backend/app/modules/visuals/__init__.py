@@ -1,1 +1,1 @@
-"""Planned module — see docs/DEVELOPMENT_ROADMAP.md. Not implemented in Phase 1."""
+"""Planned module — see docs/DEVELOPMENT_ROADMAP.md. Implemented from Phase 5."""

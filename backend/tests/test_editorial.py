@@ -214,6 +214,44 @@ def test_fabrications_are_flagged_for_the_editor(tenant) -> None:
     assert all(cid for p in a["v"].paragraphs for cid in p["claim_ids"])  # C99 dropped
 
 
+def test_unattributed_single_source_and_causal_links_are_warnings() -> None:
+    from app.modules.editorial.writer import ClaimRef, check_text
+
+    c = ClaimRef(
+        "C1",
+        "id1",
+        "CM announced NPR 50 million relief",
+        "insufficient",
+        "official",
+        ["kathmandupost.example.com"],
+        ["The Chief Minister announced relief of NPR 50 million"],
+        [],
+    )
+    by_id = {"id1": c}
+    plain = check_text(
+        [{"text": "The Chief Minister has released NPR 50 million in aid.", "claim_ids": ["id1"]}],
+        by_id,
+    )
+    attributed = check_text(
+        [
+            {
+                "text": "The Chief Minister announced relief of NPR 50 million, "
+                "according to The Kathmandu Post.",
+                "claim_ids": ["id1"],
+            }
+        ],
+        by_id,
+    )
+    assert [f["severity"] for f in plain if f["code"] == "single_source_claim"] == ["warning"]
+    assert [f["severity"] for f in attributed if f["code"] == "single_source_claim"] == ["info"]
+    causal = check_text(
+        [{"text": "x", "claim_ids": ["id1"]}],
+        by_id,
+        {"summary": "Floods displaced families, prompting NPR 50 million relief"},
+    )
+    assert [f["code"] for f in causal] == ["single_source_claim", "unsupported_causal_link"]
+
+
 def test_conflicting_claim_is_flagged(tenant) -> None:
     eid = researched(tenant.tenant_id, domains=[*TWO, "rising.example.net"])
     with tenant_db(tenant.tenant_id) as db:

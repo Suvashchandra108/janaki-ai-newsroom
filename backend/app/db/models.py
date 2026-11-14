@@ -16,6 +16,7 @@ from app.modules.identity.models import (
 )
 from app.modules.research.models import Claim, Evidence, SourceDocument
 from app.modules.tenancy.models import Tenant
+from app.modules.visuals.models import MediaAsset
 
 __all__ = [
     "ApiKey",
@@ -28,6 +29,7 @@ __all__ = [
     "Claim",
     "DiscoveredItem",
     "Evidence",
+    "MediaAsset",
     "NewsEvent",
     "NewsSource",
     "Permission",

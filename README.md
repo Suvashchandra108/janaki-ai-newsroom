@@ -13,7 +13,9 @@ First tenant: **Janaki Television**.
 | 2 | News discovery & scheduling (RSS, SSRF-safe fetch, dedupe, clustering, hourly jobs) | ✅ done, verified in CI |
 | 3 | Research & evidence (article retrieval, grounded AI claim extraction, rule-based corroboration, editor review) | ✅ done, awaiting review |
 | 4 | English AI writing: two angles, claim citations, fabrication flags, editor versions | ✅ done, awaiting review |
-| 5–9 | Visuals, dashboard, delivery to the existing JanakiTelevision CMS, billing, production | planned |
+| 5 | Visuals: licensed photos (Wikimedia Commons), charts from verified figures, AI-illustration rules | ✅ done, awaiting review |
+| 7 | Delivery of drafts to the existing JanakiTelevision CMS | next |
+| 6, 8, 9 | Dashboard, billing, production | planned |
 
 **Language:** English-only at launch (decision 14 Nov 2026). Nepali will be enabled later per tenant.
 

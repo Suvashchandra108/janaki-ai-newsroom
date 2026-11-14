@@ -37,6 +37,17 @@ python -c "import json; from app.main import app; json.dump(app.openapi(), open(
 
 The first CI run (commit `5bcc45a`) failed and exposed two real defects the sandbox could not: the package was not installable (`pip install .`, also used by the Dockerfile), and a lint auto-fix had unregistered the discovery models from Alembic's metadata. Both fixed in `e5db466`; `tests/test_metadata.py` now guards the registry.
 
+## Phase 5 results (actually executed, 14 Nov 2026)
+
+| Check | Result |
+|---|---|
+| `pytest` (Phases 1–5) | **186 passed**, 4 skipped (live checks, run in CI), 96% coverage |
+| `ruff` / `mypy` | clean / no issues (62 files) |
+| Migration `0005` up → down → up, `alembic check` | clean, no drift |
+| S3 storage | tested against `moto` (simulated S3); not yet against a real bucket |
+
+Phase 5 coverage: 10 licence cases; Commons parsing, attribution and non-image skipping; provenance on candidates; no duplicate candidates; non-publishable refused by API and by DB constraints; selection downloads, keeps the source, makes WebP derivatives without EXIF/GPS, tenant-prefixed keys, path traversal refused; corrupt files and decompression bombs refused; no upscaling; same-story rule; human-only and role permissions; tenant isolation (API, files, DB); charts only from verified same-unit figures with escaped SVG; AI illustrations: not configured, photo-first, label, safe prompt, caption label, daily limit, DB label constraint; local and S3 storage.
+
 ## Phase 4 results (actually executed, 14 Nov 2026)
 
 | Check | Result |

@@ -57,6 +57,19 @@ class Settings(BaseSettings):
     ai_model_writing: str = ""  # falls back to ai_model_extraction when empty
     ai_timeout_seconds: float = 60.0
 
+    # Media (Phase 5)
+    storage_backend: Literal["local", "s3"] = "local"
+    storage_local_root: str = "./var/media"
+    s3_endpoint_url: str = ""  # any S3-compatible service; empty = AWS default
+    s3_bucket: str = ""
+    s3_region: str = "auto"
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+    media_max_download_bytes: int = 8_000_000
+    media_contact: str = (
+        "newsroom@janaki-newsroom.example.com"  # sent in User-Agent per API etiquette
+    )
+
     # Research (Phase 3)
     research_max_documents_per_event: int = 6
     research_max_claims_per_document: int = 8

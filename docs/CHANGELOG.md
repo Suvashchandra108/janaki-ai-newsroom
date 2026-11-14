@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0] — 2026-11-14 — Phase 5: visuals
+- Writing checks tightened after the first live draft: unattributed single-source claims are warnings; cause-and-effect wording not present in sources is flagged (`unsupported_causal_link`).
+- `media_assets` table (migration `0005`, RLS) with CHECK constraints: unlicensed images cannot be publishable or selected; AI images must carry the label.
+- Wikimedia Commons adapter with licence classifier (CC0/PD/CC BY/CC BY-SA allowed; NC, ND, GFDL-only and unknown refused) and full provenance and attribution.
+- Safe image download (approved hosts, size cap, image MIME types), Pillow validation (decompression bombs, formats), source copy plus WebP derivatives without metadata.
+- Storage: local and S3-compatible backends with tenant-prefixed keys; authenticated file endpoint.
+- Charts: bar charts from verified same-unit figures with source, date and methodology; escaped SVG.
+- AI illustration interface: safe prompt builder, label, daily limit, photo-first rule (no provider configured yet).
+- Editor API: search, list, select (download + derivatives), reject, chart, illustration, files.
+- 186 tests passing; live Wikimedia Commons check added to CI.
+
+
 ## [0.4.0] — 2026-11-14 — Phase 4: English writing
 - Approved source list (`deploy/feeds/approved.json`, 12 English sources) — weekly GitHub check now targets it.
 - Tables `articles`, `article_versions` (migration `0004`, RLS; versions insert-only).
