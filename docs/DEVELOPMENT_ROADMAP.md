@@ -44,7 +44,7 @@ The existing **JanakiTelevision** repository already contains a tested Next.js +
 - Verification status is computed by fixed rules from evidence (2+ independent publishers ⇒ corroborated; any contradiction ⇒ conflicting; otherwise insufficient). Syndicated copies count once.
 - Claim matching across publishers is keyword-based (v1); claims phrased very differently may appear as separate claims. Embedding-based matching can follow.
 - Article text is stored for internal research only; a retention/purge job is still to be added (Phase 9).
-- Real AI calls are not yet verified: no API key has been configured. Adapters are tested against recorded response shapes.
+- Real Gemini call verified in CI (14 Nov 2026, free-tier key in the owner's account). Before production, pin a specific model id (`AI_MODEL_EXTRACTION` / CI variable `GEMINI_MODEL`) instead of the `-latest` alias, so behaviour does not change silently.
 
 ## Phase 2 notes
 

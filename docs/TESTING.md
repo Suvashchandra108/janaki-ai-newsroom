@@ -45,7 +45,7 @@ The first CI run (commit `5bcc45a`) failed and exposed two real defects the sand
 | `ruff` / `mypy` | clean / no issues (49 files) |
 | Migration `0003` up → down → up, `alembic check` | clean, no drift |
 | GitHub CI run 43608469560 (commit `7286df4`) | **all steps green, 149 passed, 0 skipped** (incl. live RSS fetch), 96% coverage |
-| Real AI provider calls | **not verified** — no API key configured yet. Adapters tested against recorded request/response shapes (Gemini, OpenAI-compatible) |
+| Real AI provider call (Gemini) | **verified** in CI run 43613492295 with the `GEMINI_API_KEY` secret: model `gemini-flash-lite-latest`, 387 input / 179 output tokens, 2 grounded claims kept (2,000 families displaced; NPR 50 million relief). The model's relief figure was dropped because it was not written that way in the quoted sentence — the grounding check working as designed |
 
 Phase 3 coverage: main-text extraction; robots.txt (disallow, 404, 503, unreachable); grounded validation (invented excerpts, numbers absent from excerpts, quote/whitespace normalisation, bad types, duplicates, limits); claim matching; numeric conflicts incl. unit plurals; syndication-aware independence; every status rule; end-to-end: corroboration, contradiction, single source, syndicated copies, hostile page + compromised model, no AI configured, quota interruption and resume without double spending, idempotency, re-runs without duplicates, robots respected, daily cap and prioritisation, worker and scheduler; API: inspection, review rules (note required, reporter blocked, API key blocked as non-human), tenant isolation, manual research, usage report.
 
