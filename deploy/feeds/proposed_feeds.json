@@ -1,0 +1,23 @@
+{
+  "_note": "PROPOSED English sources for Janaki Television. Not active until the owner approves and they are imported (python -m scripts.bootstrap sources). 'category' uses the website's section slugs. Credibility is an editorial starting point for Janaki TV editors to adjust.",
+  "sources": [
+    {"name": "The Kathmandu Post", "feed_url": "https://kathmandupost.com/rss", "allowed_domains": ["kathmandupost.com"], "country": "NP", "category": "news", "credibility": "high", "priority": 90},
+    {"name": "The Himalayan Times", "feed_url": "https://thehimalayantimes.com/feed", "allowed_domains": ["thehimalayantimes.com"], "country": "NP", "category": "news", "credibility": "high", "priority": 85},
+    {"name": "The Rising Nepal", "feed_url": "https://risingnepaldaily.com/rss", "allowed_domains": ["risingnepaldaily.com"], "country": "NP", "category": "news", "credibility": "medium", "priority": 80},
+    {"name": "Online Khabar English", "feed_url": "https://english.onlinekhabar.com/feed", "allowed_domains": ["onlinekhabar.com"], "country": "NP", "category": "news", "credibility": "medium", "priority": 80},
+    {"name": "myRepublica", "feed_url": "https://myrepublica.nagariknetwork.com/rss", "allowed_domains": ["nagariknetwork.com"], "country": "NP", "category": "news", "credibility": "medium", "priority": 75},
+    {"name": "Nepali Times", "feed_url": "https://nepalitimes.com/rss", "allowed_domains": ["nepalitimes.com"], "country": "NP", "category": "news", "credibility": "high", "priority": 70},
+    {"name": "Khabarhub English", "feed_url": "https://english.khabarhub.com/feed/", "allowed_domains": ["khabarhub.com"], "country": "NP", "category": "news", "credibility": "medium", "priority": 65},
+    {"name": "Ratopati English", "feed_url": "https://english.ratopati.com/rss", "allowed_domains": ["ratopati.com"], "country": "NP", "category": "news", "credibility": "medium", "priority": 60},
+    {"name": "Nepal News", "feed_url": "https://nepalnews.com/feed", "allowed_domains": ["nepalnews.com"], "country": "NP", "category": "news", "credibility": "medium", "priority": 60},
+    {"name": "The Hindu - National", "feed_url": "https://www.thehindu.com/news/national/feeder/default.rss", "allowed_domains": ["thehindu.com"], "country": "IN", "category": "international", "credibility": "high", "priority": 55},
+    {"name": "The Indian Express - India", "feed_url": "https://indianexpress.com/section/india/feed/", "allowed_domains": ["indianexpress.com"], "country": "IN", "category": "international", "credibility": "high", "priority": 55},
+    {"name": "Hindustan Times - India", "feed_url": "https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml", "allowed_domains": ["hindustantimes.com"], "country": "IN", "category": "international", "credibility": "medium", "priority": 50},
+    {"name": "Hindustan Times - Patna (Bihar, borders Madhesh)", "feed_url": "https://www.hindustantimes.com/feeds/rss/cities/patna-news/rssfeed.xml", "allowed_domains": ["hindustantimes.com"], "country": "IN", "region": "Bihar", "category": "international", "credibility": "medium", "priority": 60},
+    {"name": "BBC News - World", "feed_url": "https://feeds.bbci.co.uk/news/world/rss.xml", "allowed_domains": ["bbci.co.uk", "bbc.co.uk", "bbc.com"], "country": "GB", "category": "international", "credibility": "high", "priority": 50},
+    {"name": "BBC News - Asia", "feed_url": "https://feeds.bbci.co.uk/news/world/asia/rss.xml", "allowed_domains": ["bbci.co.uk", "bbc.co.uk", "bbc.com"], "country": "GB", "category": "international", "credibility": "high", "priority": 60},
+    {"name": "Al Jazeera English", "feed_url": "https://www.aljazeera.com/xml/rss/all.xml", "allowed_domains": ["aljazeera.com"], "country": "QA", "category": "international", "credibility": "high", "priority": 45},
+    {"name": "The Guardian - World", "feed_url": "https://www.theguardian.com/world/rss", "allowed_domains": ["theguardian.com"], "country": "GB", "category": "international", "credibility": "high", "priority": 40},
+    {"name": "UN News - Asia Pacific", "feed_url": "https://news.un.org/feed/subscribe/en/news/region/asia-pacific/feed/rss.xml", "allowed_domains": ["news.un.org"], "country": "UN", "category": "international", "credibility": "high", "priority": 45}
+  ]
+}

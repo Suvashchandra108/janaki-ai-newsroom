@@ -52,7 +52,7 @@ SOURCE_FIELDS = (
 # --- sources ------------------------------------------------------------------------------
 
 
-def _validate_source(kind: str, data: dict[str, Any]) -> None:
+def validate_source(kind: str, data: dict[str, Any]) -> None:
     domains = [normalise_domain(d) for d in data.get("allowed_domains") or []]
     if not domains or len(domains) > 20 or not all(_DOMAIN_RE.match(d) for d in domains):
         raise AppError(
@@ -80,7 +80,7 @@ def _validate_source(kind: str, data: dict[str, Any]) -> None:
 def create_source(db: Session, principal: Principal, data: dict[str, Any]) -> NewsSource:
     assert principal.tenant_id
     kind = data.pop("kind", "rss")
-    _validate_source(kind, data)
+    validate_source(kind, data)
     src = NewsSource(
         tenant_id=principal.tenant_id,
         kind=kind,
@@ -120,7 +120,7 @@ def update_source(
 ) -> NewsSource:
     src = get_source(db, principal, source_id)
     merged = {k: getattr(src, k) for k in SOURCE_FIELDS} | changes
-    _validate_source(src.kind, merged)
+    validate_source(src.kind, merged)
     for k in changes:
         setattr(src, k, merged[k])
     if changes.get("is_enabled"):

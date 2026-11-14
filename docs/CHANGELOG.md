@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1] — 2026-11-14 — Decisions, live Gemini, proposed sources
+- Live Gemini extraction verified in CI (free-tier key in the owner's account, stored as a GitHub secret).
+- Decision: drafts will be delivered to the existing JanakiTelevision Payload CMS instead of building a new CMS (Phase 7 rescoped); field mapping documented in DEVELOPMENT_ROADMAP.md.
+- Proposed English source list (`deploy/feeds/proposed_feeds.json`), feed checker (`scripts/check_feeds.py`) and weekly GitHub workflow; `bootstrap sources` import command (skips existing feeds).
+
+
 ## [0.3.0] — 2026-11-14 — Phase 3: research and evidence
 - Tables: `source_documents`, `claims`, `evidence`, `usage_records` (migration `0003`, RLS; usage ledger append-only).
 - Article retrieval through `SafeFetcher`, approved domains only, robots.txt honoured (4xx ⇒ allowed, 5xx/unreachable ⇒ retry later); main-text extraction.

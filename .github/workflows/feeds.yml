@@ -1,0 +1,31 @@
+name: Check news feeds
+
+# Report-only: verifies the proposed/approved RSS sources from GitHub's network
+# (feed loads, items parse, links stay on approved domains, robots.txt allows article fetches).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "deploy/feeds/**"
+      - "backend/scripts/check_feeds.py"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"  # weekly, Monday 03:17 UTC
+
+jobs:
+  feeds:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e .
+      - name: Check feeds
+        run: |
+          python -m scripts.check_feeds ../deploy/feeds/proposed_feeds.json | tee report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"

@@ -11,7 +11,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 4 | AI gateway (free-tier first: Gemini, Groq, OpenRouter; plus OpenAI, Anthropic), two-angle **English** generation, SEO/social fields, versioning, usage accounting. Nepali + consistency checks when enabled | |
 | 5 | Visuals: licensed image adapters, licence records, storage, optimisation, AI illustrations, charts | |
 | 6 | Newsroom dashboard (Next.js, ne/en UI) | |
-| 7 | CMS + public site, workflow, scheduling, idempotent publishing, Janaki TV migration plan (staging first) | |
+| 7 | **CMS connector** to the existing JanakiTelevision website (Payload CMS): deliver English drafts as unpublished `draft` articles via a reporter-level bot account; idempotent delivery; status sync back (decision 14 Nov 2026 — replaces building a new CMS) | |
 | 8 | SaaS commercial: onboarding, plans, metering, quota enforcement, billing adapter, rate limiting | |
 | 9 | Production deployment, backups + restore test, monitoring, security & load testing | |
 
@@ -34,9 +34,29 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 6. `articles`, `article_versions` tables; AI can create drafts only (human-only approve/publish already enforced).
 7. Regeneration limit and usage accounting per article.
 
-## Decision needed before Phase 7
+## Decisions (14 Nov 2026, product owner)
 
-The existing **JanakiTelevision** repository already contains a tested Next.js + Payload CMS website with an editorial workflow (not yet deployed). Recommended: the newsroom delivers English drafts into that CMS as unpublished drafts via an API, instead of building a second CMS. Awaiting product-owner decision.
+1. **No second CMS.** Drafts go into the existing **JanakiTelevision** website (Next.js + Payload CMS, separate repository), where Janaki editors review, approve and publish with their existing workflow. The newsroom keeps its own records (events, claims, evidence, article versions) and delivers each draft once.
+2. **Starting source list:** Claude proposes English RSS sources (`deploy/feeds/proposed_feeds.json`), checked automatically from GitHub (`.github/workflows/feeds.yml`); the owner approves the final list before import.
+
+### Planned draft → website field mapping (Payload `articles` collection)
+
+| Newsroom (Phase 4) | Website field | Limit / rule |
+|---|---|---|
+| headline | `title` | |
+| slug | `slug` | |
+| summary | `summary` | needed to publish |
+| body paragraphs | `body` (Lexical rich text) | converted at delivery |
+| language `en` | `language` | |
+| category slug | `categories` | website section slugs (politics, news, business, international, sports, health …) |
+| keywords | `tags` | max 15 |
+| SEO title / description | `seo.title` / `seo.description` | ≤ 70 / ≤ 170 chars |
+| social headline / summary | `distribution.socialHeadline` / `socialSummary` | ≤ 120 / ≤ 280 chars |
+| — | `aiAssisted` | always `true` |
+| — | `status` | always `draft`; the newsroom never sets inReview/approved/published |
+| sources, claim statuses, alternative headline, angle | `editorialNotes` | internal only, never published |
+
+Website-side work needed in Phase 7 (in the JanakiTelevision repo, reviewed separately): a reporter-role bot user with API-key access (Payload `useAPIKey` is not enabled today).
 
 ## Phase 3 notes
 
