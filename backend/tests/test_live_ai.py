@@ -60,3 +60,51 @@ def test_real_gemini_extracts_grounded_claims() -> None:
     assert result.input_tokens > 0
     assert claims, "model returned no grounded claims"
     assert any(n["value"] == 2000 for c in claims for n in c.numbers)
+
+
+def test_real_gemini_writes_cited_english_draft() -> None:
+    from app.modules.editorial.writer import ClaimRef, plan_angles, write_article
+
+    claims = [
+        ClaimRef(
+            "C1",
+            "id-1",
+            "Floods in Saptari district displaced 2,000 families",
+            "corroborated",
+            "official",
+            ["kathmandupost.com", "risingnepaldaily.com"],
+            [
+                "Floods in Saptari district have displaced 2,000 families, the Madhesh "
+                "Province government said on Friday."
+            ],
+            [{"value": 2000, "unit": "families"}],
+        ),
+        ClaimRef(
+            "C2",
+            "id-2",
+            "The Chief Minister announced NPR 50 million in relief",
+            "insufficient",
+            "official",
+            ["kathmandupost.com"],
+            ["The Chief Minister announced relief of NPR 50 million for affected households."],
+            [{"value": 50, "unit": "NPR million"}],
+        ),
+    ]
+    llm = GeminiProvider(api_key=KEY, model=_pick_model())
+    try:
+        plan, _ = plan_angles(llm, headline="Saptari floods", claims=claims)
+        draft, result = write_article(
+            llm, headline="Saptari floods", angle="straight", focus=None, claims=claims
+        )
+    except AIError as exc:
+        pytest.fail(f"Gemini call failed: {exc.code} ({exc.message})")
+    print(f"\nPlan: A={plan.a_refs} B={plan.b_refs} ({plan.b_reason})")
+    print(f"Tokens: {result.input_tokens} in / {result.output_tokens} out")
+    print(f"HEADLINE: {draft.headline}\nSUMMARY: {draft.summary}")
+    for p in draft.paragraphs:
+        print(f"  - {p['text']}  [cites {len(p['claim_ids'])}]")
+    print(f"SEO: {draft.seo_title} | {draft.seo_description}")
+    print(f"FLAGS: {[f['code'] for f in draft.flags]}")
+    assert draft.headline and draft.paragraphs
+    assert any(p["claim_ids"] for p in draft.paragraphs)
+    assert len(draft.seo_title) <= 70 and len(draft.seo_description) <= 170

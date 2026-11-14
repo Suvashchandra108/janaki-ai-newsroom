@@ -18,6 +18,8 @@ Caveats: free tiers may use prompts for provider training (Gemini free tier does
 
 **Phase 3 actuals by design:** research uses 1 AI call per article, at most 6 articles per event, and only for events within the daily cap (default 10). Worst case ≈ 60 extraction calls/day, typically 20–30, well inside the free tiers above. Every call is recorded in `usage_records` and reported by `GET /api/v1/usage/ai`.
 
+**Phase 4 actuals by design:** writing uses 3 AI calls per eligible event (plan + Article A + optional Article B); with the default cap of 10 researched events/day that is at most 30 writing calls/day. Combined with research (≤ 60), the worst case is ≈ 90 calls/day. The first live Gemini extraction call used 387 input / 179 output tokens.
+
 The original bilingual model below is kept for when Nepali is enabled.
 
 ---

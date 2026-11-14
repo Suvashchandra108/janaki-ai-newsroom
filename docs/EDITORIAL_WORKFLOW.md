@@ -59,6 +59,15 @@ For each eligible event the system proposes Article A (straight report) and Arti
    - **Insufficient evidence** — only one publisher;
    - **Editor verified** — a person confirmed it and wrote how (required note). Only people can do this, never API keys or service accounts.
 
+## How drafts are written (Phase 4, English)
+
+1. A story is written only after research, and only if at least one claim is **corroborated** or **editor-verified**.
+2. The AI receives only the numbered checked claims and must cite them in every paragraph. Single-source claims must be attributed; conflicting claims must be presented as disputed.
+3. **Article A** (straight report) is always written. **Article B** (context/impact) is written only if there is evidence A does not use, and is discarded if it turns out too similar to A. The reason is recorded either way.
+4. Automatic checks flag, for the editor: paragraphs with no claim, numbers not found in the cited claims (also in headline/summary), quotes not found in any source, and reliance on conflicting or single-source claims. Any warning puts the draft in **Needs review**.
+5. Editors can edit (each save is a new version), regenerate (limited, default 3 times) or reject. Old versions can always be viewed and never change.
+6. Approval and publication happen in the Janaki Television website CMS, after delivery.
+
 ## Claim categories shown to editors
 
 Confirmed fact · Reported claim · Official statement · Allegation · Opinion · Estimate · Unverified. Each sentence in a draft links to the claims it relies on; sentences without evidence are highlighted.

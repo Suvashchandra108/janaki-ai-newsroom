@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] — 2026-11-14 — Phase 4: English writing
+- Approved source list (`deploy/feeds/approved.json`, 12 English sources) — weekly GitHub check now targets it.
+- Tables `articles`, `article_versions` (migration `0004`, RLS; versions insert-only).
+- Writing engine: eligibility gate, angle planner (A always, B only with distinct evidence), evidence-only prompts with numbered claims, paragraph-level claim citations, B discarded if too similar to A.
+- Rule-based flags: uncited paragraph, unsupported number (body, headline, summary), unverified quote, conflicting claim, single-source claim. SEO/social limits match the website (70/170/280).
+- Editor API: list/view, version history, edit (new version, re-checked), regenerate (limited), reject; human-only; `POST /events/{id}/write`.
+- Hourly writing schedule (minute 40); usage recorded as `ai.angle_planning` / `ai.writing`; `AI_MODEL_WRITING` setting.
+- Live Gemini writing test added to CI. 162 tests passing locally.
+
+
 ## [0.3.1] — 2026-11-14 — Decisions, live Gemini, proposed sources
 - Live Gemini extraction verified in CI (free-tier key in the owner's account, stored as a GitHub secret).
 - Decision: drafts will be delivered to the existing JanakiTelevision Payload CMS instead of building a new CMS (Phase 7 rescoped); field mapping documented in DEVELOPMENT_ROADMAP.md.

@@ -4,6 +4,7 @@ from app.db.base import Base
 from app.modules.ai_gateway.models import UsageRecord
 from app.modules.audit.models import AuditLog
 from app.modules.discovery.models import BackgroundJob, DiscoveredItem, NewsEvent, NewsSource
+from app.modules.editorial.models import Article, ArticleVersion
 from app.modules.identity.models import (
     ApiKey,
     AuthSession,
@@ -18,6 +19,8 @@ from app.modules.tenancy.models import Tenant
 
 __all__ = [
     "ApiKey",
+    "Article",
+    "ArticleVersion",
     "AuditLog",
     "AuthSession",
     "BackgroundJob",

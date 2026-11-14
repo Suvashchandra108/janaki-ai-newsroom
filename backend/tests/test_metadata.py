@@ -22,6 +22,8 @@ EXPECTED_TABLES = {
     "claims",
     "evidence",
     "usage_records",
+    "articles",
+    "article_versions",
 }
 
 

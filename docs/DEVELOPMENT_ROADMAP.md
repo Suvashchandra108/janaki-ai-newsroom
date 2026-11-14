@@ -8,7 +8,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 1 | SaaS foundation: tenants, users, RBAC, auth, sessions, MFA, API keys, RLS, audit, config | **Done (14 Nov 2026)** |
 | 2 | Discovery: source registry, safe fetch (SSRF), RSS + search adapter interface, dedupe, clustering, hourly scheduler, quotas, job history | **Done — verified in CI (14 Nov 2026)** |
 | 3 | Research & evidence: article retrieval (robots.txt), grounded claim extraction, corroboration, conflict detection, rule-based statuses, evidence review API, usage ledger | **Done — verified in CI (14 Nov 2026), awaiting review** |
-| 4 | AI gateway (free-tier first: Gemini, Groq, OpenRouter; plus OpenAI, Anthropic), two-angle **English** generation, SEO/social fields, versioning, usage accounting. Nepali + consistency checks when enabled | |
+| 4 | Two-angle **English** writing from checked claims, paragraph citations, fabrication flags, SEO/social fields, immutable versions, editor edit/regenerate/reject, usage accounting. Nepali + consistency checks when enabled | **Done — awaiting review** |
 | 5 | Visuals: licensed image adapters, licence records, storage, optimisation, AI illustrations, charts | |
 | 6 | Newsroom dashboard (Next.js, ne/en UI) | |
 | 7 | **CMS connector** to the existing JanakiTelevision website (Payload CMS): deliver English drafts as unpublished `draft` articles via a reporter-level bot account; idempotent delivery; status sync back (decision 14 Nov 2026 — replaces building a new CMS) | |
@@ -24,15 +24,19 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 3. **Rate limiting split.** Per-account lockout ships in Phase 1; IP/token-bucket limiting ships with quota enforcement in Phase 8 (shared Redis infrastructure).
 4. **Celery chosen over Dramatiq** for its built-in beat scheduler and wider operational tooling.
 
-## Phase 4 tasks (next) — English writing
+## Next steps
 
-1. Writing model settings (`AI_MODEL_WRITING`), same gateway; blind editor test of 2–3 free models on 5 real stories before choosing.
-2. Eligibility gate: only events whose key claims are corroborated or editor-verified are written; conflicting claims must be presented as conflicting.
-3. Angle planner: Article A (straight report) always; Article B (context/impact) only if it can cite evidence A does not use; otherwise record why not.
-4. Drafts cite claim IDs per paragraph; sentences without a claim are flagged for the editor.
-5. Headline, alternative headline, slug, summary, caption, SEO title/description, keywords, social captions.
-6. `articles`, `article_versions` tables; AI can create drafts only (human-only approve/publish already enforced).
-7. Regeneration limit and usage accounting per article.
+**Phase 5 — visuals (next):** Wikimedia Commons adapter with licence metadata (commercial use, attribution, licence URL), publishable flag computed from licence fields, image optimisation and storage, AI-illustration adapter with mandatory label, charts only from verified claim numbers.
+
+**Alternative order to consider:** Phase 7 (delivery of drafts into the JanakiTelevision CMS) could come before visuals, so editors start reviewing real drafts in their own CMS sooner. Needs website-side changes (bot user with API key) in the JanakiTelevision repo.
+
+## Phase 4 notes
+
+- Eligibility: an event is written only after research, and only if at least one claim is corroborated or editor-verified. Single-source claims may be used only with attribution; conflicting claims must be presented as disputed.
+- Three AI calls per event (plan, Article A, optional Article B). B is written only if the plan gives it claims A does not use (overlap < 70%) and is discarded if its text overlaps A by more than 60%.
+- Every paragraph cites claim IDs. Rule-based flags: uncited paragraph, unsupported number (incl. headline/summary), unverified quote, conflicting claim, single-source claim (info). Warnings set status `needs_review`.
+- Versions are immutable (DB grant: INSERT/SELECT only). Editor edits and regenerations create new versions; regeneration limited per tenant (default 3). Only people can edit/regenerate/reject.
+- Approval and publishing are not done here: they happen in the website CMS after delivery (Phase 7).
 
 ## Decisions (14 Nov 2026, product owner)
 

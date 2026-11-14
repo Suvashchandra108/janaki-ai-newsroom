@@ -37,6 +37,16 @@ python -c "import json; from app.main import app; json.dump(app.openapi(), open(
 
 The first CI run (commit `5bcc45a`) failed and exposed two real defects the sandbox could not: the package was not installable (`pip install .`, also used by the Dockerfile), and a lint auto-fix had unregistered the discovery models from Alembic's metadata. Both fixed in `e5db466`; `tests/test_metadata.py` now guards the registry.
 
+## Phase 4 results (actually executed, 14 Nov 2026)
+
+| Check | Result |
+|---|---|
+| `pytest` (Phases 1–4) | **162 passed**, 3 skipped (live checks, run in CI), 96% coverage |
+| `ruff` / `mypy` | clean / no issues (53 files) |
+| Migration `0004` up → down → up, `alembic check` | clean, no drift |
+
+Phase 4 coverage: two distinct angles with citations and limits; no B without distinct evidence; B discarded when repeating A; plan rejected when B reuses A's claims; fabrication flags (invented death toll, headline figure, uncited paragraph, unknown claim ID, invented quote); conflicting-claim flag; eligibility gate; no AI / quota failure / retry / idempotency / already-written; unique slugs; versions immutable in the DB; API: view, edit with re-check and history, unknown claim IDs rejected, regeneration limit, reject, role permissions, API keys blocked as non-human, tenant isolation, eligibility on manual write; worker and hourly schedule.
+
 ## Phase 3 results (actually executed, 14 Nov 2026)
 
 | Check | Result |

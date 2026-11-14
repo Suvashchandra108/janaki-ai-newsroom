@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     ai_api_key: str = ""
     ai_base_url: str = ""  # openai_compatible only, e.g. the provider's /v1 base URL
     ai_model_extraction: str = ""
+    ai_model_writing: str = ""  # falls back to ai_model_extraction when empty
     ai_timeout_seconds: float = 60.0
 
     # Research (Phase 3)

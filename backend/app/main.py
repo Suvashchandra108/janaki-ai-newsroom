@@ -12,6 +12,7 @@ from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.discovery_routes import ALL_DISCOVERY_ROUTERS
+from app.api.v1.editorial_routes import router as editorial_router
 from app.api.v1.research_routes import router as research_router
 from app.api.v1.routers import ALL_ROUTERS
 from app.core.config import get_settings
@@ -42,7 +43,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         version="0.1.0",
-        description="Multi-tenant AI-assisted newsroom and CMS. Phases 1-3.",
+        description="Multi-tenant AI-assisted newsroom and CMS. Phases 1-4.",
         docs_url="/api/docs" if docs_enabled else None,
         redoc_url=None,
         openapi_url="/api/openapi.json" if docs_enabled else None,
@@ -110,7 +111,7 @@ def create_app() -> FastAPI:
         finally:
             db.close()
 
-    for router in [*ALL_ROUTERS, *ALL_DISCOVERY_ROUTERS, research_router]:
+    for router in [*ALL_ROUTERS, *ALL_DISCOVERY_ROUTERS, research_router, editorial_router]:
         app.include_router(router, prefix="/api/v1")
     return app
 

@@ -54,6 +54,7 @@ known-first-party = ["app", "tests", "scripts"]
 "alembic/**" = ["E501"]
 # Deliberate Unicode punctuation normalisation and delimiter neutralisation.
 "app/modules/research/claims.py" = ["RUF001"]
+"app/modules/editorial/writer.py" = ["RUF001"]
 
 [tool.mypy]
 python_version = "3.12"

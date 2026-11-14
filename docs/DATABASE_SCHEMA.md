@@ -54,6 +54,13 @@ Settings are applied with `set_config(..., true)` (transaction-local), so a pool
 | `evidence` | `claim_id`, `item_id`, `document_id`, `url`, `publisher_domain`, `published_at`, `retrieved_at`, `excerpt` (verbatim), `evidence_type`, `relationship` (supports/contradicts/context), `content_hash` | Yes | One row per claim × article × relationship |
 | `usage_records` | `kind`, `provider`, `model`, `input_tokens`, `output_tokens`, `job_id` | Yes | Append-only ledger for cost tracking |
 
+## 3d. Phase 4 tables (implemented — migration `0004_articles`)
+
+| Table | Key columns | RLS | Notes |
+|---|---|---|---|
+| `articles` | `event_id`, `angle` (straight/context), `language`, `slug` (unique per tenant), `status` (draft/needs_review/rejected/delivered), `current_version`, `regenerations`, `rejection_reason` | Yes | One per event × angle × language |
+| `article_versions` | `article_id`, `version`, `headline`, `alt_headline`, `summary`, `paragraphs` jsonb (text + claim_ids), `image_caption`, `seo_title` (≤70), `seo_description` (≤170), `keywords[]`, `category`, `location`, `social` jsonb, `flags` jsonb, `attribution`, `created_by_kind` (ai/user), `created_by_user`, `model`, `note` | Yes | Immutable: app role has INSERT/SELECT only |
+
 ## 4. Full planned entity–relationship diagram
 
 ```mermaid

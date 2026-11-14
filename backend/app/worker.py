@@ -16,10 +16,11 @@ from sqlalchemy import select
 from app.core import security
 from app.core.config import get_settings
 from app.db.session import new_session, set_tenant_context, system_scope
-from app.modules.ai_gateway.gateway import get_extraction_provider
+from app.modules.ai_gateway.gateway import get_extraction_provider, get_writing_provider
 from app.modules.discovery import service as discovery
 from app.modules.discovery.adapters import get_search_provider
 from app.modules.discovery.safe_fetch import SafeFetcher
+from app.modules.editorial import service as editorial
 from app.modules.research import service as research
 from app.modules.tenancy.models import Tenant
 
@@ -35,6 +36,7 @@ celery_app.conf.update(
     beat_schedule={
         "discovery-hourly": {"task": "discovery.schedule_all", "schedule": crontab(minute=5)},
         "research-hourly": {"task": "research.schedule_all", "schedule": crontab(minute=20)},
+        "writing-hourly": {"task": "writing.schedule_all", "schedule": crontab(minute=40)},
     },
 )
 
@@ -183,4 +185,79 @@ def research_event(
 def enqueue_research(tenant_id: uuid.UUID, event_id: uuid.UUID) -> str:
     key = f"research:{event_id}:manual:{uuid.uuid4().hex[:12]}"
     research_event.delay(str(tenant_id), str(event_id), key, "manual")
+    return key
+
+
+# --- writing (Phase 4) --------------------------------------------------------------------
+
+
+@celery_app.task(name="writing.schedule_all")
+def writing_schedule_all() -> int:
+    """Queue English drafts for researched events that have corroborated/verified claims."""
+    now = security.utcnow()
+    queued = 0
+    for tid in due_tenants():
+        db = new_session()
+        try:
+            set_tenant_context(db, tid)
+            tenant = db.get(Tenant, tid)
+            assert tenant is not None
+            event_ids = editorial.events_ready(db, tenant)
+        finally:
+            db.rollback()
+            db.close()
+        for eid in event_ids:
+            write_event.delay(str(tid), str(eid), editorial.writing_key(eid, now), "schedule")
+            queued += 1
+    return queued
+
+
+def execute_writing(tenant_id: str, event_id: str, key: str, trigger: str) -> dict[str, Any]:
+    db = new_session()
+    try:
+        tid = uuid.UUID(tenant_id)
+        set_tenant_context(db, tid)
+        job = editorial.run_writing(
+            db,
+            tenant_id=tid,
+            event_id=uuid.UUID(event_id),
+            idempotency_key=key,
+            trigger=trigger,
+            llm=get_writing_provider(),
+        )
+        out: dict[str, Any] = (
+            {"status": "already_done"}
+            if job is None
+            else {
+                "status": job.status,
+                "job_id": str(job.id),
+                "ai_error": job.result.get("ai_error"),
+            }
+        )
+        db.commit()
+        return out
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@celery_app.task(name="writing.run_event", bind=True, max_retries=MAX_RETRIES)
+def write_event(
+    self: Any, tenant_id: str, event_id: str, key: str, trigger: str = "schedule"
+) -> dict[str, Any]:
+    out = execute_writing(tenant_id, event_id, key, trigger)
+    if (
+        out["status"] == "failed"
+        and out.get("ai_error") in ("rate_limited", "provider_error", "network")
+        and self.request.retries < MAX_RETRIES
+    ):
+        raise self.retry(countdown=600 * 2**self.request.retries)
+    return out
+
+
+def enqueue_writing(tenant_id: uuid.UUID, event_id: uuid.UUID) -> str:
+    key = f"writing:{event_id}:manual:{uuid.uuid4().hex[:12]}"
+    write_event.delay(str(tenant_id), str(event_id), key, "manual")
     return key

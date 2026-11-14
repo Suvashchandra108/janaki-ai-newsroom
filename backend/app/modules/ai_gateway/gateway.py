@@ -168,19 +168,27 @@ class GeminiProvider:
 
 def get_extraction_provider() -> LLMProvider | None:
     """The configured provider for extraction tasks, or None if AI is not configured."""
+    return _provider(get_settings().ai_model_extraction)
+
+
+def get_writing_provider() -> LLMProvider | None:
+    """Provider for article writing; uses AI_MODEL_WRITING, else the extraction model."""
     s = get_settings()
-    if s.ai_provider == "none" or not s.ai_api_key or not s.ai_model_extraction:
+    return _provider(s.ai_model_writing or s.ai_model_extraction)
+
+
+def _provider(model: str) -> LLMProvider | None:
+    s = get_settings()
+    if s.ai_provider == "none" or not s.ai_api_key or not model:
         return None
     if s.ai_provider == "gemini":
-        return GeminiProvider(
-            api_key=s.ai_api_key, model=s.ai_model_extraction, timeout=s.ai_timeout_seconds
-        )
+        return GeminiProvider(api_key=s.ai_api_key, model=model, timeout=s.ai_timeout_seconds)
     if not s.ai_base_url.startswith("https://"):
         return None
     return OpenAICompatibleProvider(
         base_url=s.ai_base_url,
         api_key=s.ai_api_key,
-        model=s.ai_model_extraction,
+        model=model,
         timeout=s.ai_timeout_seconds,
     )
 

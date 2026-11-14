@@ -27,5 +27,5 @@ jobs:
         run: pip install -e .
       - name: Check feeds
         run: |
-          python -m scripts.check_feeds ../deploy/feeds/proposed_feeds.json | tee report.md
+          python -m scripts.check_feeds ../deploy/feeds/approved.json | tee report.md
           cat report.md >> "$GITHUB_STEP_SUMMARY"

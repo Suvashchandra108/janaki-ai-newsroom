@@ -73,6 +73,21 @@ Common codes: `unauthorized`, `invalid_credentials`, `mfa_required`, `invalid_mf
 | POST `/claims/{id}/review` | `evidence.review`, **human user only** | `{verified: true, note}` marks editor-verified (note required); `{verified: false}` returns to the rule-based status |
 | GET `/usage/ai?days=30` | `usage.read` | AI calls and tokens by task |
 
+## Phase 4 endpoints (implemented)
+
+| Method & path | Permission | Purpose |
+|---|---|---|
+| GET `/articles?status=` | `articles.read` | Drafts with headline and warning count |
+| GET `/articles/{id}` | `articles.read` | Current version (paragraphs with claim IDs, flags, SEO, social, attribution) and version list |
+| GET `/articles/{id}/versions/{n}` | `articles.read` | Any earlier version |
+| PATCH `/articles/{id}` | `articles.edit`, human only | Edit → new version, re-checked; claim IDs must belong to the event |
+| POST `/articles/{id}/regenerate` | `articles.edit`, human only | New AI version; limited per tenant (429 when exhausted) |
+| POST `/articles/{id}/reject` | `articles.reject`, human only | `{reason}` |
+| GET `/events/{id}/articles` | `articles.read` | Articles for an event |
+| POST `/events/{id}/write` | `articles.create` | Queue writing (409 if not eligible) |
+
+There is no approve/publish endpoint: approval and publication happen in the website CMS.
+
 Platform admins deliberately have **no** access to tenant newsroom data through tenant endpoints.
 
 ## Example
@@ -84,4 +99,4 @@ curl -s -X POST localhost:8000/api/v1/auth/login -H 'Content-Type: application/j
 
 ## Planned endpoint groups
 
-`/articles`, `/editorial` (P4) · `/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
+`/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
