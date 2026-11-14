@@ -125,7 +125,7 @@ class FakeCommons:
         self.calls.append(url)
         if url.startswith(commons.API):
             return FetchResult(url, url, 200, "application/json", json.dumps(self.payload).encode())
-        if url.startswith("https://upload.wikimedia.org/"):
+        if url.startswith(("https://upload.wikimedia.org/", "https://thumb.wikimedia.org/")):
             return FetchResult(url, url, 200, "image/jpeg", self.image)
         raise FetchError("http_status", "HTTP 404", status=404)
 
@@ -212,6 +212,11 @@ def test_commons_parsing_and_attribution() -> None:
         "via Wikimedia Commons"
     )
     assert first.download_url.endswith("1600px")  # never the huge original
+    from app.modules.discovery.safe_fetch import host_allowed
+
+    for host in ("commons.wikimedia.org", "upload.wikimedia.org", "thumb.wikimedia.org"):
+        assert host_allowed(host, commons.DOMAINS)
+    assert not host_allowed("wikimedia.org.evil.example", commons.DOMAINS)
     assert "filetype%3Abitmap" in commons.search_url("Janakpur")
 
 

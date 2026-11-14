@@ -16,7 +16,8 @@ from app.modules.discovery.text import clean_text
 from app.modules.visuals.licences import Licence, classify
 
 API = "https://commons.wikimedia.org/w/api.php"
-DOMAINS = ["commons.wikimedia.org", "upload.wikimedia.org"]
+# All Wikimedia Foundation media hosts (commons., upload., thumb., ...). Subdomains match.
+DOMAINS = ["wikimedia.org"]
 IMAGE_MIMES = ("image/jpeg", "image/png", "image/webp")
 
 
