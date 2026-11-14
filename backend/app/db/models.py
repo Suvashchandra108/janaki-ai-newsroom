@@ -2,6 +2,7 @@
 
 from app.db.base import Base
 from app.modules.audit.models import AuditLog
+from app.modules.discovery.models import BackgroundJob, DiscoveredItem, NewsEvent, NewsSource
 from app.modules.identity.models import (
     ApiKey,
     AuthSession,
@@ -17,7 +18,11 @@ __all__ = [
     "ApiKey",
     "AuditLog",
     "AuthSession",
+    "BackgroundJob",
     "Base",
+    "DiscoveredItem",
+    "NewsEvent",
+    "NewsSource",
     "Permission",
     "Role",
     "RolePermission",
