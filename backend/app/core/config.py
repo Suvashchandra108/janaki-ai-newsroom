@@ -42,6 +42,12 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
+    # Background jobs (Phase 2)
+    redis_url: str = "redis://localhost:6379/0"
+    discovery_cluster_window_hours: int = 48
+    fetch_timeout_seconds: float = 10.0
+    fetch_max_bytes: int = 2_000_000
+
     @model_validator(mode="after")
     def _refuse_weak_secrets_outside_dev(self) -> Settings:
         if self.environment in {"staging", "production"}:

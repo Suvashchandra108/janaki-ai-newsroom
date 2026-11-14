@@ -18,7 +18,7 @@ def _provision(client: TestClient, h: dict[str, str], slug: str) -> object:
         json={
             "slug": slug,
             "name": slug.title(),
-            "default_language": "ne",
+            "default_language": "en",
             "admin_email": f"admin@{slug}.example.com",
             "admin_full_name": "Admin",
             "admin_password": PASSWORD,

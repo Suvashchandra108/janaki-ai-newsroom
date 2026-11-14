@@ -29,6 +29,20 @@ alembic check                    # models and migrations agree (needs DATABASE_O
 python -c "import json; from app.main import app; json.dump(app.openapi(), open('../docs/openapi.json','w'), indent=2)"
 ```
 
+## Phase 2 results (actually executed, 14 Nov 2026)
+
+| Check | Result |
+|---|---|
+| `pytest` (Phases 1 + 2) | **108 passed**, 0 failed, ~26 s |
+| Coverage (`app/`) | **96%** |
+| `ruff` / `mypy` | clean / no issues (41 files) |
+| Migration `0002` up → down → up, `alembic check` | clean, no drift |
+| Real Celery worker + Redis + dev DB | task received, ran, per-source error recorded, retry scheduled under the same job |
+| Fetching a real public RSS feed | **not verified** — the build sandbox has no outbound internet (`dns_failure`). Verify on a networked machine: add a source, then `POST /api/v1/discovery/run` |
+| `docker compose config` (now with `worker`, `beat`) | valid; `docker compose up` not run (no daemon) |
+
+Phase 2 coverage: SSRF (scheme/port/credential/IP-literal/domain checks, 14 IP classes, internal and mixed DNS answers, pinned connection to a real local server, redirects to foreign hosts and cloud metadata, redirect loops, size cap, content type, HTTP errors); URL canonicalisation; clustering; RSS/Atom parsing incl. double-encoded HTML; ingestion with cross-publisher clustering and preserved source items; idempotent keys; retry reusing the job; partial failures; quota; pause; disabled sources; search approved-publisher filter; tenant isolation of discovery data and APIs; worker execution and hourly scheduler.
+
 ## Phase 1 results (actually executed, 14 Nov 2026, PostgreSQL 16.15, Python 3.13)
 
 | Check | Result |

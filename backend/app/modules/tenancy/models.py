@@ -20,5 +20,5 @@ class Tenant(UUIDPk, Timestamps, Base):
     slug: Mapped[str] = mapped_column(String(63), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="active")
-    default_language: Mapped[str] = mapped_column(String(5), nullable=False, default="ne")
+    default_language: Mapped[str] = mapped_column(String(5), nullable=False, default="en")
     settings: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)

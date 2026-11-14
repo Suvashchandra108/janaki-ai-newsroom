@@ -47,6 +47,21 @@ Common codes: `unauthorized`, `invalid_credentials`, `mfa_required`, `invalid_mf
 | GET `/audit-logs` | user or key | `audit.read` | `?action=&limit=&offset=` |
 | GET `/health`, `/ready` | none | — | Liveness / DB readiness (outside `/api/v1`) |
 
+## Phase 2 endpoints (implemented)
+
+| Method & path | Permission | Purpose |
+|---|---|---|
+| GET `/sources` | `events.read` | Approved sources with last fetch status/error |
+| POST `/sources` | `sources.manage` | Add RSS (`feed_url` must be on `allowed_domains`) or search source |
+| GET / PATCH `/sources/{id}` | `events.read` / `sources.manage` | View / edit, enable/disable. No DELETE (traceability) |
+| GET `/discovery/status` | `events.read` | Paused?, quota, items today, next run, last job |
+| POST `/discovery/run` | `discovery.run` | Queue a run now (202). 409 if paused, 503 if queue down |
+| POST `/discovery/pause`, `/discovery/resume` | `discovery.run` | Stop / restart scheduled discovery |
+| GET `/discovery/jobs` | `events.read` | Job history with per-run results and errors |
+| GET `/discovery/items` | `events.read` | Discovered items (`?source_id=`) |
+| GET `/events` | `events.read` | Events (`?min_publishers=2` for multi-source stories) |
+| GET `/events/{id}` | `events.read` | Event with every source item |
+
 Platform admins deliberately have **no** access to tenant newsroom data through tenant endpoints.
 
 ## Example
@@ -58,4 +73,4 @@ curl -s -X POST localhost:8000/api/v1/auth/login -H 'Content-Type: application/j
 
 ## Planned endpoint groups
 
-`/sources`, `/discovery` (P2) · `/events`, `/evidence` (P3) · `/articles`, `/editorial` (P4) · `/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
+`/evidence`, `/claims` (P3) · `/articles`, `/editorial` (P4) · `/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).

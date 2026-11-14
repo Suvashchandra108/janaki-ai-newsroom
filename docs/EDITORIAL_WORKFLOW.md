@@ -40,6 +40,10 @@ Transitions marked *human editor only* require a human user holding `articles.ap
 | Publish | ✓ | ✓ | – | – | **never** |
 | Manage users, API keys | ✓ | – | – | – | **never** |
 
+## Language
+
+English only at launch (2 drafts per eligible event). When a tenant enables Nepali, each angle also gets a Nepali version and a fact/number consistency check between languages.
+
 ## Two-angle rule
 
 For each eligible event the system proposes Article A (straight report) and Article B (context/impact). B is produced only if it cites evidence not used by A and passes a similarity threshold; otherwise one article is produced with the reason recorded on the event.

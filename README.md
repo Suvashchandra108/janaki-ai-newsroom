@@ -1,6 +1,6 @@
 # Janaki AI Newsroom
 
-A multi-tenant, AI-assisted newsroom and CMS for newspapers, TV channels and digital portals. It discovers news, researches and cross-checks it, drafts two distinct editorial angles in Nepali and English, sources licensed visuals, and hands everything to human editors. **No AI process can approve or publish an article.**
+A multi-tenant, AI-assisted newsroom and CMS for newspapers, TV channels and digital portals. It discovers news, researches and cross-checks it, drafts two distinct editorial angles (English first; Nepali to follow), sources licensed visuals, and hands everything to human editors. **No AI process can approve or publish an article.**
 
 First tenant: **Janaki Television**.
 
@@ -9,9 +9,12 @@ First tenant: **Janaki Television**.
 | Phase | | Status |
 |---|---|---|
 | 0 | Audit & engineering plan | ✅ done |
-| 1 | SaaS foundation (tenants, auth, MFA, RBAC, API keys, RLS, audit) | ✅ done, awaiting review |
-| 2 | News discovery & scheduling | next |
-| 3–9 | Research, bilingual AI, visuals, dashboard, CMS, billing, production | planned |
+| 1 | SaaS foundation (tenants, auth, MFA, RBAC, API keys, RLS, audit) | ✅ done |
+| 2 | News discovery & scheduling (RSS, SSRF-safe fetch, dedupe, clustering, hourly jobs) | ✅ done, awaiting review |
+| 3 | Research & evidence | next |
+| 4–9 | AI writing, visuals, dashboard, CMS, billing, production | planned |
+
+**Language:** English-only at launch (decision 14 Nov 2026). Nepali will be enabled later per tenant.
 
 Not production-ready. See [docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md).
 
@@ -19,7 +22,7 @@ Not production-ready. See [docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP
 
 ```bash
 cp .env.example .env              # fill in values
-docker compose up --build
+docker compose up --build        # postgres, redis, migrate, api, worker, beat
 docker compose exec api python -m scripts.bootstrap platform-admin --email you@example.com --name "You"
 docker compose exec api python -m scripts.bootstrap tenant --slug janaki-tv --name "Janaki Television" \
   --admin-email admin@janakitv.example.com --admin-name "Janaki Admin"

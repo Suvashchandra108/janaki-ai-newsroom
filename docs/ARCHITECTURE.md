@@ -1,6 +1,6 @@
 # Architecture — Janaki AI Newsroom
 
-Status: **Phase 0 plan + Phase 1 implemented.** Sections marked *(planned)* are not yet built.
+Status: **Phases 0–2 implemented** (English-first; Nepali later). Sections marked *(planned)* are not yet built.
 
 ## 1. Current-state assessment (Phase 0 audit)
 
@@ -44,7 +44,7 @@ flowchart LR
       AUTH[auth / identity]
       TEN[tenancy + RBAC]
       AUD[audit]
-      DISC[discovery*]
+      DISC[discovery]
       RES[research & evidence*]
       EDT[editorial AI*]
       VIS[visual intelligence*]
@@ -69,7 +69,7 @@ flowchart LR
     Workers --> S3
     App --> S3
 
-    subgraph Outbound[Egress via safe-fetch gateway*]
+    subgraph Outbound[Egress via safe-fetch gateway]
       RSS[RSS feeds]
       SRCH[Search APIs]
       AIG[AI gateway → OpenAI / Anthropic / future]
@@ -78,7 +78,7 @@ flowchart LR
     Workers --> Outbound
 ```
 
-`*` = planned (Phases 2–8). Phase 1 delivers auth, tenancy, RBAC, API keys and audit.
+`*` = planned (Phases 3–8). Phase 1 delivered auth, tenancy, RBAC, API keys and audit; Phase 2 delivered discovery, the safe-fetch gateway and the scheduler.
 
 ## 4. Key technical decisions
 
@@ -132,6 +132,7 @@ janaki-ai-newsroom/
 │   ├── alembic/versions/       # migrations (owner role)
 │   ├── app/
 │   │   ├── main.py             # app factory, routers, error handlers
+│   │   ├── worker.py           # Celery worker + hourly beat
 │   │   ├── core/               # config, security primitives, errors, permissions
 │   │   ├── db/                 # engine, session, tenant context, base model
 │   │   ├── api/                # deps (auth → Principal), v1 routers
@@ -139,7 +140,7 @@ janaki-ai-newsroom/
 │   │       ├── tenancy/        # Phase 1
 │   │       ├── identity/       # Phase 1: users, roles, sessions, MFA, API keys
 │   │       ├── audit/          # Phase 1
-│   │       ├── discovery/      # Phase 2 (planned)
+│   │       ├── discovery/      # Phase 2: sources, safe_fetch, adapters, clustering
 │   │       ├── research/       # Phase 3 (planned)
 │   │       ├── editorial/      # Phase 4 (planned)
 │   │       ├── ai_gateway/     # Phase 4 (planned)

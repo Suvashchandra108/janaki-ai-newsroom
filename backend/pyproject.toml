@@ -16,6 +16,8 @@ dependencies = [
   "pyjwt>=2.8",
   "pyotp>=2.9",
   "cryptography>=42",
+  "feedparser>=6.0",
+  "celery[redis]>=5.4",
 ]
 
 [project.optional-dependencies]
@@ -40,7 +42,7 @@ known-third-party = ["alembic"]
 known-first-party = ["app", "tests", "scripts"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S105", "S106"]
+"tests/**" = ["S104", "S105", "S106"]
 "alembic/**" = ["E501"]
 
 [tool.mypy]

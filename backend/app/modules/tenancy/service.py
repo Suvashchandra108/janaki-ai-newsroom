@@ -14,8 +14,11 @@ from app.modules.identity import service as identity
 from app.modules.identity.models import User
 from app.modules.tenancy.models import Tenant
 
+# English-first launch (decision 2026-11-14): new tenants publish in their default language
+# only. Nepali is enabled later by adding "ne" to "languages"; the schema already supports it.
 DEFAULT_TENANT_SETTINGS = {
-    "languages": ["ne", "en"],
+    "languages": ["en"],
+    "timezone": "Asia/Kathmandu",
     "discovery": {"interval_minutes": 60, "daily_item_quota": 100, "paused": False},
     "generation": {"daily_event_cap": 10, "max_regenerations": 3},
     "attribution": {"ai_assisted_label": True},
@@ -40,7 +43,7 @@ def provision_tenant(
             slug=slug.strip().lower(),
             name=name.strip(),
             default_language=default_language,
-            settings=dict(DEFAULT_TENANT_SETTINGS),
+            settings={**DEFAULT_TENANT_SETTINGS, "languages": [default_language]},
         )
         db.add(tenant)
         try:

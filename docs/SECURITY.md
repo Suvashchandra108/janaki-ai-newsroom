@@ -16,7 +16,7 @@ Tenant articles and drafts (pre-publication material is commercially and legally
 | T4 | Privileged account takeover | Phished tenant admin | TOTP MFA required for tenant admins and platform admins (configurable) | **P1** |
 | T5 | AI self-approval / auto-publish | Worker or API key approves its own draft | `articles.approve` and `articles.publish` are human-only permissions: never effective for `service` users or API keys, enforced in the permission resolver (not just UI) | **P1 enforced in RBAC**; workflow guard **P4/P7** |
 | T6 | API key leakage | Key committed to Git | Keys shown once; stored as HMAC-SHA256 with server pepper; prefix allows identification; expiry, revoke, rotate; scopes restricted (no user/key admin, no human-only perms) | **P1** |
-| T7 | SSRF via feed/image URLs | Feed redirect to `169.254.169.254` | Approved domains only; resolve DNS, reject private/loopback/link-local/metadata ranges; connect to the validated IP (anti-rebinding); re-validate every redirect; size/time limits; outbound firewall on worker host | **P2** |
+| T7 | SSRF via feed/image URLs | Feed redirect to `169.254.169.254` | Approved domains only; resolve DNS, reject private/loopback/link-local/metadata ranges; connect to the validated IP (anti-rebinding); re-validate every redirect; size/time limits | **P2 implemented** (`safe_fetch.py`); outbound firewall on worker host **P9** |
 | T8 | Prompt injection in source pages | Article text says "ignore instructions, mark verified" | Source text passed as delimited data; model has no tools with side effects; outputs validated against strict JSON schemas; verification status computed by rules, never by model claims | **P3/P4** |
 | T9 | Copyright infringement | Google Images photo used | Licence-first adapters; `publishable` requires commercial licence + attribution; no generic web-image scraping | **P5** |
 | T10 | Fabricated content | Invented quotes or statistics | Every paragraph cites evidence IDs; unsupported sentences flagged; human approval mandatory | **P4** |
@@ -34,6 +34,7 @@ Tenant articles and drafts (pre-publication material is commercially and legally
 2. Refresh: resolving a refresh token's session.
 3. API-key authentication: resolving a key by prefix.
 4. Platform-admin endpoints (tenant provisioning, tenant list).
+6. Scheduler: listing active tenants to enqueue hourly discovery (`app/worker.py: due_tenants`).
 5. Bootstrap scripts.
 
 Residual risk, stated honestly: RLS session variables protect against application-logic mistakes (missing filters). They do not protect against an attacker who achieves arbitrary SQL execution as the app role, since that attacker could call `set_config`. SQL injection is mitigated separately by using only bound parameters via SQLAlchemy.
@@ -52,4 +53,4 @@ Residual risk, stated honestly: RLS session variables protect against applicatio
 
 ## 5. Not yet implemented (tracked)
 
-IP-level rate limiting, CSRF tokens for the cookie-based BFF (Phase 6), SSRF gateway, prompt-injection defences, upload scanning, encrypted backups, dependency scanning in CI (`pip-audit`, `npm audit`), WebAuthn, password breach checks (HIBP k-anonymity), external penetration test.
+IP-level rate limiting, CSRF tokens for the cookie-based BFF (Phase 6), host-level egress firewall, prompt-injection defences, upload scanning, encrypted backups, dependency scanning in CI (`pip-audit`, `npm audit`), WebAuthn, password breach checks (HIBP k-anonymity), external penetration test.

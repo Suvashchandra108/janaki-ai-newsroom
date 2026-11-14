@@ -36,7 +36,7 @@ def main() -> None:
     t = sub.add_parser("tenant")
     t.add_argument("--slug", required=True)
     t.add_argument("--name", required=True)
-    t.add_argument("--language", default="ne", choices=["ne", "en"])
+    t.add_argument("--language", default="en", choices=["ne", "en"])
     t.add_argument("--admin-email", required=True)
     t.add_argument("--admin-name", required=True)
     args = parser.parse_args()

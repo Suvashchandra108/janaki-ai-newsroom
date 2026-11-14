@@ -36,7 +36,10 @@ from app.modules.identity.models import User
 from app.modules.tenancy import service as tenancy
 
 PASSWORD = "correct horse battery staple"
-TABLES = "audit_logs, api_keys, auth_sessions, user_roles, users, tenants"
+TABLES = (
+    "discovered_items, news_events, background_jobs, news_sources, "
+    "audit_logs, api_keys, auth_sessions, user_roles, users, tenants"
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -54,6 +57,8 @@ def clean_tables() -> Iterator[None]:
     yield
     engine = create_engine(os.environ["DATABASE_OWNER_URL"])
     with engine.begin() as conn:
+        # A test that leaks an open transaction must fail loudly, not hang the suite.
+        conn.execute(text("SET LOCAL lock_timeout = '5s'"))
         conn.execute(text(f"TRUNCATE {TABLES} RESTART IDENTITY CASCADE"))
     engine.dispose()
 
@@ -103,7 +108,7 @@ def make_tenant(slug: str, *, admin_email: str | None = None) -> Account:
         None,
         slug=slug,
         name=slug.title(),
-        default_language="ne",
+        default_language="en",
         admin_email=admin_email or f"admin@{slug}.example.com",
         admin_full_name="Admin",
         admin_password=PASSWORD,

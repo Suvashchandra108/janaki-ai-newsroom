@@ -81,7 +81,7 @@ class TenantOut(ORM):
 class TenantProvisionIn(BaseModel):
     slug: str = Slug
     name: str = Field(min_length=2, max_length=200)
-    default_language: Lang = "ne"
+    default_language: Lang = "en"
     admin_email: EmailStr
     admin_full_name: str = Field(min_length=1, max_length=200)
     admin_password: str = Field(max_length=256)

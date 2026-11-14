@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0] — 2026-11-14 — English-first decision and Phase 2
+
+### Decision
+- English-only launch: new tenants default to `languages: ["en"]`, `default_language: en`; Nepali remains supported in the schema and is enabled per tenant later. Cost model updated for free-tier-first AI.
+
+### Phase 2 — news discovery
+- Tables: `news_sources`, `discovered_items`, `news_events`, `background_jobs` (migration `0002`, RLS on all four; sources cannot be deleted, only disabled).
+- `SafeFetcher`: approved-domain allow-list re-checked on every redirect, DNS resolved once with all addresses required to be public, connection pinned to the validated IP, size/time/content-type limits.
+- RSS/Atom adapter (feedparser on bytes only); search-provider interface with approved-publisher filtering (no concrete provider yet).
+- Canonical URLs (tracking parameters, `www`, fragments, trailing slashes removed) for duplicate detection; per-tenant uniqueness.
+- Event clustering v1: headline keywords with light stemming + 64-bit SimHash, 48-hour window; every source item kept and linked to its event.
+- Celery worker and hourly beat (minute 5); one job per tenant per hour keyed `discovery:<tenant>:<hour>`; retries reuse the same job; per-source errors recorded without stopping other sources.
+- Daily item quota in the tenant's timezone (default Asia/Kathmandu, 100/day), pause/resume, manual run, job history, status endpoint.
+- API: `/sources`, `/discovery/{status,run,pause,resume,jobs,items}`, `/events`.
+- 108 tests passing (96% coverage); docker-compose gains `worker` and `beat`.
+
+### Fixed
+- Feed descriptions with double-encoded HTML left tags in the text.
+- Test hygiene: sessions always closed; cleanup uses a lock timeout so a failing test cannot hang the suite.
+
+
 ## [0.1.0] — 2026-11-14 — Phase 0 and Phase 1
 
 ### Phase 0 — audit and plan

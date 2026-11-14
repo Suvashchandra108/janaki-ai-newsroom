@@ -36,6 +36,15 @@ Settings are applied with `set_config(..., true)` (transaction-local), so a pool
 | `api_keys` | `tenant_id`, `name`, `prefix` (unique), `secret_hash` (HMAC-SHA256 with server pepper), `scopes` text[], `expires_at`, `revoked_at`, `rotated_from_id` | Yes | Plaintext shown once at creation |
 | `audit_logs` | `tenant_id`, `actor_type`, `actor_id`, `action`, `target_type`, `target_id`, `ip`, `details` jsonb | Yes | Append-only for the app role |
 
+## 3b. Phase 2 tables (implemented — migration `0002_news_discovery`)
+
+| Table | Key columns | RLS | Notes |
+|---|---|---|---|
+| `news_sources` | `kind` (rss/search), `feed_url`, `search_query`, `allowed_domains[]`, `language`, `country`, `region`, `category`, `priority`, `credibility`, `is_enabled`, `last_error`, `consecutive_failures` | Yes | App role has no DELETE: disable instead, so provenance stays traceable |
+| `discovered_items` | `source_id`, `event_id`, `job_id`, `url`, `canonical_url`, `url_hash` (unique per tenant), `publisher_domain`, `title`, `description`, `published_at`, `retrieved_at`, `content_fingerprint`, `title_simhash` | Yes | One row per article URL; never merged away |
+| `news_events` | `title`, `keywords[]`, `title_simhash`, `status`, `item_count`, `publisher_count`, `first_seen_at`, `last_seen_at` | Yes | Groups items about the same story |
+| `background_jobs` | `job_type`, `idempotency_key` (unique per tenant), `trigger`, `status`, `attempts`, `result` jsonb, `error` | Yes | Job history and idempotency |
+
 ## 4. Full planned entity–relationship diagram
 
 ```mermaid
