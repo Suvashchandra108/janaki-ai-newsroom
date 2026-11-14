@@ -29,6 +29,14 @@ alembic check                    # models and migrations agree (needs DATABASE_O
 python -c "import json; from app.main import app; json.dump(app.openapi(), open('../docs/openapi.json','w'), indent=2)"
 ```
 
+## Continuous integration (GitHub Actions)
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request: clean install, ruff, mypy, `alembic upgrade` + `alembic check`, and the full test suite against PostgreSQL 16 and Redis 7, with `LIVE_FETCH=1` so one test fetches a real public RSS feed through `SafeFetcher`.
+
+**Stage 2 sign-off — CI run 43607339635 (commit `e5db466`, 14 Nov 2026): all steps green, 110 passed, 0 skipped, 96% coverage**, including the live RSS fetch.
+
+The first CI run (commit `5bcc45a`) failed and exposed two real defects the sandbox could not: the package was not installable (`pip install .`, also used by the Dockerfile), and a lint auto-fix had unregistered the discovery models from Alembic's metadata. Both fixed in `e5db466`; `tests/test_metadata.py` now guards the registry.
+
 ## Phase 2 results (actually executed, 14 Nov 2026)
 
 | Check | Result |
@@ -38,7 +46,7 @@ python -c "import json; from app.main import app; json.dump(app.openapi(), open(
 | `ruff` / `mypy` | clean / no issues (41 files) |
 | Migration `0002` up → down → up, `alembic check` | clean, no drift |
 | Real Celery worker + Redis + dev DB | task received, ran, per-source error recorded, retry scheduled under the same job |
-| Fetching a real public RSS feed | **not verified** — the build sandbox has no outbound internet (`dns_failure`). Verify on a networked machine: add a source, then `POST /api/v1/discovery/run` |
+| Fetching a real public RSS feed | Not possible in the sandbox (no internet); **verified in GitHub CI** (see above) |
 | `docker compose config` (now with `worker`, `beat`) | valid; `docker compose up` not run (no daemon) |
 
 Phase 2 coverage: SSRF (scheme/port/credential/IP-literal/domain checks, 14 IP classes, internal and mixed DNS answers, pinned connection to a real local server, redirects to foreign hosts and cloud metadata, redirect loops, size cap, content type, HTTP errors); URL canonicalisation; clustering; RSS/Atom parsing incl. double-encoded HTML; ingestion with cross-publisher clustering and preserved source items; idempotent keys; retry reusing the job; partial failures; quota; pause; disabled sources; search approved-publisher filter; tenant isolation of discovery data and APIs; worker execution and hourly scheduler.

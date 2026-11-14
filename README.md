@@ -10,8 +10,8 @@ First tenant: **Janaki Television**.
 |---|---|---|
 | 0 | Audit & engineering plan | ✅ done |
 | 1 | SaaS foundation (tenants, auth, MFA, RBAC, API keys, RLS, audit) | ✅ done |
-| 2 | News discovery & scheduling (RSS, SSRF-safe fetch, dedupe, clustering, hourly jobs) | ✅ done, awaiting review |
-| 3 | Research & evidence | next |
+| 2 | News discovery & scheduling (RSS, SSRF-safe fetch, dedupe, clustering, hourly jobs) | ✅ done, verified in CI |
+| 3 | Research & evidence | in progress |
 | 4–9 | AI writing, visuals, dashboard, CMS, billing, production | planned |
 
 **Language:** English-only at launch (decision 14 Nov 2026). Nepali will be enabled later per tenant.

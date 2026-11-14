@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1] — 2026-11-14 — Stage 2 verified in CI
+- Repository published privately at github.com/Suvashchandra108/janaki-ai-newsroom.
+- GitHub Actions CI added (install, lint, types, migration drift, tests incl. live RSS fetch).
+- Fixed: package not installable (missing build-system / package discovery config).
+- Fixed: discovery models dropped from Alembic metadata by a lint auto-fix; guard test added.
+- CI run on `e5db466`: all green, 110 passed.
+
+
 ## [0.2.0] — 2026-11-14 — English-first decision and Phase 2
 
 ### Decision
