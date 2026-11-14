@@ -22,6 +22,7 @@ dependencies = [
   "cryptography>=42",
   "feedparser>=6.0",
   "celery[redis]>=5.4",
+  "httpx>=0.27",
 ]
 
 [project.optional-dependencies]
@@ -51,6 +52,8 @@ known-first-party = ["app", "tests", "scripts"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S104", "S105", "S106"]
 "alembic/**" = ["E501"]
+# Deliberate Unicode punctuation normalisation and delimiter neutralisation.
+"app/modules/research/claims.py" = ["RUF001"]
 
 [tool.mypy]
 python_version = "3.12"

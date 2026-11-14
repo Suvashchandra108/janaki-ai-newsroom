@@ -7,7 +7,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 0 | Repository audit, architecture, schema, threat model, roadmap, cost model | **Done (14 Nov 2026)** |
 | 1 | SaaS foundation: tenants, users, RBAC, auth, sessions, MFA, API keys, RLS, audit, config | **Done (14 Nov 2026)** |
 | 2 | Discovery: source registry, safe fetch (SSRF), RSS + search adapter interface, dedupe, clustering, hourly scheduler, quotas, job history | **Done — verified in CI (14 Nov 2026)** |
-| 3 | Research & evidence: claims, evidence, corroboration, conflict detection, rule-based statuses, evidence review API | In progress |
+| 3 | Research & evidence: article retrieval (robots.txt), grounded claim extraction, corroboration, conflict detection, rule-based statuses, evidence review API, usage ledger | **Done — awaiting review** |
 | 4 | AI gateway (free-tier first: Gemini, Groq, OpenRouter; plus OpenAI, Anthropic), two-angle **English** generation, SEO/social fields, versioning, usage accounting. Nepali + consistency checks when enabled | |
 | 5 | Visuals: licensed image adapters, licence records, storage, optimisation, AI illustrations, charts | |
 | 6 | Newsroom dashboard (Next.js, ne/en UI) | |
@@ -24,15 +24,27 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 3. **Rate limiting split.** Per-account lockout ships in Phase 1; IP/token-bucket limiting ships with quota enforcement in Phase 8 (shared Redis infrastructure).
 4. **Celery chosen over Dramatiq** for its built-in beat scheduler and wider operational tooling.
 
-## Phase 3 tasks (next)
+## Phase 4 tasks (next) — English writing
 
-1. `claims`, `evidence`, `claim_evidence` tables (tenant-scoped, RLS).
-2. Article-page fetching through `SafeFetcher` (publisher domain must be approved) and main-text extraction.
-3. Claim extraction behind a small AI-gateway interface (free-tier model, strict JSON schema, output validation). The full gateway arrives in Phase 4; Phase 3 uses the same interface.
-4. Corroboration: match claims across items in the same event from *independent* publishers; flag conflicting numbers/dates/names.
-5. Rule-based verification status (never model confidence) and claim types (fact, reported, official, allegation, opinion, estimate, unverified).
-6. Evidence review API for editors (mark editor-verified, add notes), with audit.
-7. Prompt-injection defences: source text passed as delimited data; no tools; schema validation.
+1. Writing model settings (`AI_MODEL_WRITING`), same gateway; blind editor test of 2–3 free models on 5 real stories before choosing.
+2. Eligibility gate: only events whose key claims are corroborated or editor-verified are written; conflicting claims must be presented as conflicting.
+3. Angle planner: Article A (straight report) always; Article B (context/impact) only if it can cite evidence A does not use; otherwise record why not.
+4. Drafts cite claim IDs per paragraph; sentences without a claim are flagged for the editor.
+5. Headline, alternative headline, slug, summary, caption, SEO title/description, keywords, social captions.
+6. `articles`, `article_versions` tables; AI can create drafts only (human-only approve/publish already enforced).
+7. Regeneration limit and usage accounting per article.
+
+## Decision needed before Phase 7
+
+The existing **JanakiTelevision** repository already contains a tested Next.js + Payload CMS website with an editorial workflow (not yet deployed). Recommended: the newsroom delivers English drafts into that CMS as unpublished drafts via an API, instead of building a second CMS. Awaiting product-owner decision.
+
+## Phase 3 notes
+
+- Claims must quote the article verbatim; ungrounded claims and numbers are discarded before storage.
+- Verification status is computed by fixed rules from evidence (2+ independent publishers ⇒ corroborated; any contradiction ⇒ conflicting; otherwise insufficient). Syndicated copies count once.
+- Claim matching across publishers is keyword-based (v1); claims phrased very differently may appear as separate claims. Embedding-based matching can follow.
+- Article text is stored for internal research only; a retention/purge job is still to be added (Phase 9).
+- Real AI calls are not yet verified: no API key has been configured. Adapters are tested against recorded response shapes.
 
 ## Phase 2 notes
 

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0] — 2026-11-14 — Phase 3: research and evidence
+- Tables: `source_documents`, `claims`, `evidence`, `usage_records` (migration `0003`, RLS; usage ledger append-only).
+- Article retrieval through `SafeFetcher`, approved domains only, robots.txt honoured (4xx ⇒ allowed, 5xx/unreachable ⇒ retry later); main-text extraction.
+- AI gateway: Gemini and OpenAI-compatible (Groq, OpenRouter, OpenAI) adapters; models set by configuration only; HTTPS-only endpoints; errors classified as retryable or not.
+- Grounded claim extraction: excerpt must appear verbatim in the article, numbers must appear in the excerpt; untrusted-data prompt; delimiter spoofing neutralised; strict schema.
+- Rule-based verification: cross-publisher claim matching, numeric conflict detection (2% tolerance, unit-normalised), independent-publisher counting with syndication collapsed, statuses corroborated / conflicting / insufficient / editor_verified.
+- Research jobs: hourly schedule (minute 20) within the tenant's daily event cap, multi-publisher events first, idempotent per event per day, quota interruptions resume without re-sending processed articles.
+- API: `/events/{id}/claims`, `/events/{id}/research` (GET/POST), `/claims/{id}`, `/claims/{id}/review` (human only, note required), `/usage/ai`.
+- 148 tests passing (96% coverage).
+
+### Fixed during Phase 3
+- New evidence was not flushed before status recomputation, so the latest article could be ignored.
+- Research scheduler read event IDs after closing its session.
+- Unit normalisation treated "families" and "family" as different units.
+- `httpx` was only a test dependency although the gateway needs it at runtime.
+
+
 ## [0.2.1] — 2026-11-14 — Stage 2 verified in CI
 - Repository published privately at github.com/Suvashchandra108/janaki-ai-newsroom.
 - GitHub Actions CI added (install, lint, types, migration drift, tests incl. live RSS fetch).

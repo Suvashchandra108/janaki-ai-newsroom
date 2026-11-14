@@ -48,6 +48,19 @@ class Settings(BaseSettings):
     fetch_timeout_seconds: float = 10.0
     fetch_max_bytes: int = 2_000_000
 
+    # AI gateway (Phase 3+). No model names are hard-coded: set them per deployment.
+    # ai_provider: "none" | "gemini" | "openai_compatible" (Groq, OpenRouter, OpenAI, ...)
+    ai_provider: Literal["none", "gemini", "openai_compatible"] = "none"
+    ai_api_key: str = ""
+    ai_base_url: str = ""  # openai_compatible only, e.g. the provider's /v1 base URL
+    ai_model_extraction: str = ""
+    ai_timeout_seconds: float = 60.0
+
+    # Research (Phase 3)
+    research_max_documents_per_event: int = 6
+    research_max_claims_per_document: int = 8
+    research_max_text_chars: int = 30_000
+
     @model_validator(mode="after")
     def _refuse_weak_secrets_outside_dev(self) -> Settings:
         if self.environment in {"staging", "production"}:

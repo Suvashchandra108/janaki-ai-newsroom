@@ -18,6 +18,10 @@ EXPECTED_TABLES = {
     "news_events",
     "discovered_items",
     "background_jobs",
+    "source_documents",
+    "claims",
+    "evidence",
+    "usage_records",
 }
 
 

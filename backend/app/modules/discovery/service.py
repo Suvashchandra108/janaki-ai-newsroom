@@ -214,14 +214,16 @@ class _Cluster:
     domains: set[str] = field(default_factory=set)
 
 
-def _claim_job(db: Session, tenant_id: uuid.UUID, key: str, trigger: str) -> BackgroundJob | None:
+def claim_job(
+    db: Session, tenant_id: uuid.UUID, key: str, trigger: str, job_type: str = "discovery"
+) -> BackgroundJob | None:
     """Return the job to run, or None if this key already ran (idempotency)."""
     db.execute(
         pg_insert(BackgroundJob)
         .values(
             id=uuid.uuid4(),
             tenant_id=tenant_id,
-            job_type="discovery",
+            job_type=job_type,
             idempotency_key=key,
             trigger=trigger,
             status="queued",
@@ -382,7 +384,7 @@ def run_discovery(
     Returns the job, or None when this idempotency key has already completed.
     """
     now = now or security.utcnow()
-    job = _claim_job(db, tenant_id, idempotency_key, trigger)
+    job = claim_job(db, tenant_id, idempotency_key, trigger)
     if job is None:
         return None
     tenant = db.get(Tenant, tenant_id)
@@ -395,10 +397,10 @@ def run_discovery(
 
     cfg = discovery_settings(tenant)
     if tenant.status != "active" or cfg["paused"]:
-        return _finish(job, "skipped", {"reason": "paused" if cfg["paused"] else "suspended"})
+        return finish_job(job, "skipped", {"reason": "paused" if cfg["paused"] else "suspended"})
     remaining = int(cfg["daily_item_quota"]) - items_today(db, tenant, now)
     if remaining <= 0:
-        return _finish(job, "skipped", {"reason": "daily_quota_exhausted", "quota_remaining": 0})
+        return finish_job(job, "skipped", {"reason": "daily_quota_exhausted", "quota_remaining": 0})
 
     sources = list(
         db.scalars(
@@ -456,13 +458,13 @@ def run_discovery(
         status = "partial"
     else:
         status = "succeeded"
-    _finish(job, status, result)
+    finish_job(job, status, result)
     if status == "failed":
         job.error = "All sources failed"
     return job
 
 
-def _finish(job: BackgroundJob, status: str, result: dict[str, Any]) -> BackgroundJob:
+def finish_job(job: BackgroundJob, status: str, result: dict[str, Any]) -> BackgroundJob:
     job.status = status
     job.result = result
     job.finished_at = security.utcnow()

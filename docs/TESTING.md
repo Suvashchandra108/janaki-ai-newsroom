@@ -37,6 +37,17 @@ python -c "import json; from app.main import app; json.dump(app.openapi(), open(
 
 The first CI run (commit `5bcc45a`) failed and exposed two real defects the sandbox could not: the package was not installable (`pip install .`, also used by the Dockerfile), and a lint auto-fix had unregistered the discovery models from Alembic's metadata. Both fixed in `e5db466`; `tests/test_metadata.py` now guards the registry.
 
+## Phase 3 results (actually executed, 14 Nov 2026)
+
+| Check | Result |
+|---|---|
+| `pytest` (Phases 1–3), fresh virtualenv | **148 passed**, 1 skipped (live fetch, runs in CI), 96% coverage |
+| `ruff` / `mypy` | clean / no issues (49 files) |
+| Migration `0003` up → down → up, `alembic check` | clean, no drift |
+| Real AI provider calls | **not verified** — no API key configured yet. Adapters tested against recorded request/response shapes (Gemini, OpenAI-compatible) |
+
+Phase 3 coverage: main-text extraction; robots.txt (disallow, 404, 503, unreachable); grounded validation (invented excerpts, numbers absent from excerpts, quote/whitespace normalisation, bad types, duplicates, limits); claim matching; numeric conflicts incl. unit plurals; syndication-aware independence; every status rule; end-to-end: corroboration, contradiction, single source, syndicated copies, hostile page + compromised model, no AI configured, quota interruption and resume without double spending, idempotency, re-runs without duplicates, robots respected, daily cap and prioritisation, worker and scheduler; API: inspection, review rules (note required, reporter blocked, API key blocked as non-human), tenant isolation, manual research, usage report.
+
 ## Phase 2 results (actually executed, 14 Nov 2026)
 
 | Check | Result |

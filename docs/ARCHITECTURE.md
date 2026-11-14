@@ -1,6 +1,6 @@
 # Architecture — Janaki AI Newsroom
 
-Status: **Phases 0–2 implemented** (English-first; Nepali later). Sections marked *(planned)* are not yet built.
+Status: **Phases 0–3 implemented** (English-first; Nepali later). Sections marked *(planned)* are not yet built.
 
 ## 1. Current-state assessment (Phase 0 audit)
 
@@ -45,7 +45,7 @@ flowchart LR
       TEN[tenancy + RBAC]
       AUD[audit]
       DISC[discovery]
-      RES[research & evidence*]
+      RES[research & evidence]
       EDT[editorial AI*]
       VIS[visual intelligence*]
       CMS[CMS & publishing*]
@@ -78,7 +78,7 @@ flowchart LR
     Workers --> Outbound
 ```
 
-`*` = planned (Phases 3–8). Phase 1 delivered auth, tenancy, RBAC, API keys and audit; Phase 2 delivered discovery, the safe-fetch gateway and the scheduler.
+`*` = planned (Phases 4–8). Phase 3 delivered research, evidence and the AI gateway. Phase 1 delivered auth, tenancy, RBAC, API keys and audit; Phase 2 delivered discovery, the safe-fetch gateway and the scheduler.
 
 ## 4. Key technical decisions
 
@@ -141,9 +141,9 @@ janaki-ai-newsroom/
 │   │       ├── identity/       # Phase 1: users, roles, sessions, MFA, API keys
 │   │       ├── audit/          # Phase 1
 │   │       ├── discovery/      # Phase 2: sources, safe_fetch, adapters, clustering
-│   │       ├── research/       # Phase 3 (planned)
+│   │       ├── research/       # Phase 3: documents, grounded claims, rules, jobs
 │   │       ├── editorial/      # Phase 4 (planned)
-│   │       ├── ai_gateway/     # Phase 4 (planned)
+│   │       ├── ai_gateway/     # Phase 3: Gemini + OpenAI-compatible adapters, usage ledger
 │   │       ├── visuals/        # Phase 5 (planned)
 │   │       ├── cms/            # Phase 7 (planned)
 │   │       └── billing/        # Phase 8 (planned)

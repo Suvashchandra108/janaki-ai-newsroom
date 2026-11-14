@@ -45,6 +45,15 @@ Settings are applied with `set_config(..., true)` (transaction-local), so a pool
 | `news_events` | `title`, `keywords[]`, `title_simhash`, `status`, `item_count`, `publisher_count`, `first_seen_at`, `last_seen_at` | Yes | Groups items about the same story |
 | `background_jobs` | `job_type`, `idempotency_key` (unique per tenant), `trigger`, `status`, `attempts`, `result` jsonb, `error` | Yes | Job history and idempotency |
 
+## 3c. Phase 3 tables (implemented — migration `0003_research_and_evidence`)
+
+| Table | Key columns | RLS | Notes |
+|---|---|---|---|
+| `source_documents` | `item_id` (unique per tenant), `status` (fetched/failed/blocked_by_robots/not_allowed/empty), `final_url`, `text`, `text_hash`, `error`, `fetched_at`, `claims_extracted_at` | Yes | Internal research copy; never republished |
+| `claims` | `event_id`, `text`, `fingerprint`, `claim_type` (fact/reported/official/allegation/opinion/estimate), `keywords[]`, `entities[]`, `numbers` jsonb, `dates[]`, `status`, `status_reason`, `independent_sources`, `editor_note`, `reviewed_by`, `reviewed_at` | Yes | Status computed by rules |
+| `evidence` | `claim_id`, `item_id`, `document_id`, `url`, `publisher_domain`, `published_at`, `retrieved_at`, `excerpt` (verbatim), `evidence_type`, `relationship` (supports/contradicts/context), `content_hash` | Yes | One row per claim × article × relationship |
+| `usage_records` | `kind`, `provider`, `model`, `input_tokens`, `output_tokens`, `job_id` | Yes | Append-only ledger for cost tracking |
+
 ## 4. Full planned entity–relationship diagram
 
 ```mermaid

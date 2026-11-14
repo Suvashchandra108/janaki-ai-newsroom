@@ -16,6 +16,8 @@ Revised monthly estimate: VPS ₹2,000–3,000 + storage ₹200–500 + AI ₹0�
 
 Caveats: free tiers may use prompts for provider training (Gemini free tier does); acceptable for public news, not for embargoed material. Model choice for writing will be decided by a blind editor test in Phase 4.
 
+**Phase 3 actuals by design:** research uses 1 AI call per article, at most 6 articles per event, and only for events within the daily cap (default 10). Worst case ≈ 60 extraction calls/day, typically 20–30, well inside the free tiers above. Every call is recorded in `usage_records` and reported by `GET /api/v1/usage/ai`.
+
 The original bilingual model below is kept for when Nepali is enabled.
 
 ---

@@ -28,10 +28,11 @@ ALLOWED_CONTENT_TYPES = ("xml", "rss", "atom", "html", "json", "text/plain")
 
 
 class FetchError(Exception):
-    def __init__(self, code: str, message: str) -> None:
+    def __init__(self, code: str, message: str, status: int | None = None) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
+        self.status = status
 
 
 @dataclass(frozen=True)
@@ -177,7 +178,7 @@ class SafeFetcher:
                 current = urljoin(current, location)
                 continue
             if status >= 400:
-                raise FetchError("http_status", f"HTTP {status}")
+                raise FetchError("http_status", f"HTTP {status}", status=status)
             ctype = headers.get("content-type", "").lower()
             if not any(t in ctype for t in ALLOWED_CONTENT_TYPES):
                 raise FetchError("bad_content_type", f"Unexpected content type: {ctype[:80]}")

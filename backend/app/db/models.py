@@ -1,6 +1,7 @@
 """Import every model so Alembic sees the full metadata."""
 
 from app.db.base import Base
+from app.modules.ai_gateway.models import UsageRecord
 from app.modules.audit.models import AuditLog
 from app.modules.discovery.models import BackgroundJob, DiscoveredItem, NewsEvent, NewsSource
 from app.modules.identity.models import (
@@ -12,6 +13,7 @@ from app.modules.identity.models import (
     User,
     UserRole,
 )
+from app.modules.research.models import Claim, Evidence, SourceDocument
 from app.modules.tenancy.models import Tenant
 
 __all__ = [
@@ -20,13 +22,17 @@ __all__ = [
     "AuthSession",
     "BackgroundJob",
     "Base",
+    "Claim",
     "DiscoveredItem",
+    "Evidence",
     "NewsEvent",
     "NewsSource",
     "Permission",
     "Role",
     "RolePermission",
+    "SourceDocument",
     "Tenant",
+    "UsageRecord",
     "User",
     "UserRole",
 ]

@@ -37,6 +37,7 @@ from app.modules.tenancy import service as tenancy
 
 PASSWORD = "correct horse battery staple"
 TABLES = (
+    "usage_records, evidence, claims, source_documents, "
     "discovered_items, news_events, background_jobs, news_sources, "
     "audit_logs, api_keys, auth_sessions, user_roles, users, tenants"
 )

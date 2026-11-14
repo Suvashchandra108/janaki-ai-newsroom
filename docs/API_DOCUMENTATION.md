@@ -62,6 +62,17 @@ Common codes: `unauthorized`, `invalid_credentials`, `mfa_required`, `invalid_mf
 | GET `/events` | `events.read` | Events (`?min_publishers=2` for multi-source stories) |
 | GET `/events/{id}` | `events.read` | Event with every source item |
 
+## Phase 3 endpoints (implemented)
+
+| Method & path | Permission | Purpose |
+|---|---|---|
+| GET `/events/{id}/claims` | `events.read` | Claims with status, reason, independent-source count and every piece of evidence (URL, publisher, dates, verbatim excerpt, supports/contradicts) |
+| GET `/events/{id}/research` | `events.read` | Per-article retrieval status, claim status counts, last research job |
+| POST `/events/{id}/research` | `discovery.run` | Queue research now (202) |
+| GET `/claims/{id}` | `events.read` | One claim with evidence |
+| POST `/claims/{id}/review` | `evidence.review`, **human user only** | `{verified: true, note}` marks editor-verified (note required); `{verified: false}` returns to the rule-based status |
+| GET `/usage/ai?days=30` | `usage.read` | AI calls and tokens by task |
+
 Platform admins deliberately have **no** access to tenant newsroom data through tenant endpoints.
 
 ## Example
@@ -73,4 +84,4 @@ curl -s -X POST localhost:8000/api/v1/auth/login -H 'Content-Type: application/j
 
 ## Planned endpoint groups
 
-`/evidence`, `/claims` (P3) · `/articles`, `/editorial` (P4) · `/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
+`/articles`, `/editorial` (P4) · `/media`, `/infographics` (P5) · `/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
