@@ -28,6 +28,10 @@ jobs:
       TEST_DATABASE_OWNER_URL: postgresql+psycopg://janaki_owner:owner_dev_pw@localhost:5432/janaki_test
       DATABASE_OWNER_URL: postgresql+psycopg://janaki_owner:owner_dev_pw@localhost:5432/janaki_test
       LIVE_FETCH: "1"
+      # Optional: set repository secret GEMINI_API_KEY (and optionally variable GEMINI_MODEL)
+      # to run one real Gemini claim-extraction test. Skipped when absent.
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -49,4 +53,7 @@ jobs:
       - name: Migrations match models
         run: alembic upgrade head && alembic check
       - name: Tests (incl. live RSS fetch)
-        run: pytest -p no:warnings --cov=app --cov-report=term
+        run: pytest -p no:warnings --cov=app --cov-report=term -rs
+      - name: Live Gemini check (details)
+        if: env.GEMINI_API_KEY != ''
+        run: pytest -p no:warnings -s tests/test_live_ai.py
