@@ -43,6 +43,7 @@ The first CI run (commit `5bcc45a`) failed and exposed two real defects the sand
 |---|---|
 | `pytest` (Phases 1–7) | **208 passed**, 4 skipped (live checks), 95% coverage |
 | `ruff` / `mypy` | clean / no issues (67 files) |
+| GitHub CI run 43686712754 (commit `c7c9b76`) | **all green: 212 passed**, 2 skipped (the live website tests, which need a running site), incl. live RSS, Commons and Gemini |
 | Migration `0006` up → down → up, `alembic check` | clean, no drift |
 | **Live end-to-end** (`tests/test_live_cms.py`) against the real JanakiTelevision code (`pnpm dev`, migration-only database, real integration and API key), run twice | **2 passed both times**: draft created with photo; status draft, AI-labelled, no byline, not public; sources and claim statuses in internal notes; licence on the photo; the integration was refused publish, edit, delete and create-as-published; re-delivery made no duplicate; an administrator published and the newsroom's sync saw `published` |
 | Found by the live run | integrations could not read their own record (`/api/integrations/me` → 403; fixed on the website); a repeated headline caused a website slug clash (fixed: slug gets a 6-character code from the article id) |
