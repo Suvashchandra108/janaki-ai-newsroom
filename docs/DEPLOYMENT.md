@@ -25,6 +25,19 @@ open http://localhost:8000/api/docs
 Without Docker: start PostgreSQL 16 and Redis, create the roles from TESTING.md, then
 `cd backend && alembic upgrade head && uvicorn app.main:app --reload`.
 
+## Connecting the JanakiTelevision website (Phase 7)
+
+1. On the website (after JanakiTelevision PR #1 is merged and deployed, and `pnpm migrate` has run): Administration → Integrations → Create “AI newsroom”, tick *Enable API key*, save, copy the key.
+2. On the newsroom server (the key is read from a hidden prompt, never typed on the command line):
+   ```bash
+   docker compose exec api python -m scripts.bootstrap cms-connect --tenant janaki-tv --url https://janakitelevision.com
+   ```
+   It saves the key encrypted and reports whether the website accepted it.
+3. Tick *Active* on the integration in the website admin, then `POST /api/v1/cms/connection/check` (or re-run step 2).
+4. Optional: add `--auto` to deliver new drafts every hour (off by default). Without it, editors deliver per article with `POST /api/v1/articles/{id}/deliver`.
+
+To stop deliveries at once: untick *Active* on the website (the key stops working), or set `enabled=false` with `PUT /cms/connection`.
+
 ## Production target (Phase 9 plan)
 
 - One India-region VPS (4 vCPU / 8 GB to start). Ubuntu LTS, unattended security upgrades, SSH keys only, `ufw` allowing 22/80/443.

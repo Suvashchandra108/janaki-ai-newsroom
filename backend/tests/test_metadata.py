@@ -25,6 +25,8 @@ EXPECTED_TABLES = {
     "articles",
     "article_versions",
     "media_assets",
+    "cms_connections",
+    "cms_deliveries",
 }
 
 

@@ -17,6 +17,7 @@ from app.core import security
 from app.core.config import get_settings
 from app.db.session import new_session, set_tenant_context, system_scope
 from app.modules.ai_gateway.gateway import get_extraction_provider, get_writing_provider
+from app.modules.cms import service as cms
 from app.modules.discovery import service as discovery
 from app.modules.discovery.adapters import get_search_provider
 from app.modules.discovery.safe_fetch import SafeFetcher
@@ -37,6 +38,8 @@ celery_app.conf.update(
         "discovery-hourly": {"task": "discovery.schedule_all", "schedule": crontab(minute=5)},
         "research-hourly": {"task": "research.schedule_all", "schedule": crontab(minute=20)},
         "writing-hourly": {"task": "writing.schedule_all", "schedule": crontab(minute=40)},
+        "cms-delivery-hourly": {"task": "cms.deliver_all", "schedule": crontab(minute=50)},
+        "cms-sync-hourly": {"task": "cms.sync_all", "schedule": crontab(minute=55)},
     },
 )
 
@@ -261,3 +264,90 @@ def enqueue_writing(tenant_id: uuid.UUID, event_id: uuid.UUID) -> str:
     key = f"writing:{event_id}:manual:{uuid.uuid4().hex[:12]}"
     write_event.delay(str(tenant_id), str(event_id), key, "manual")
     return key
+
+
+# --- website CMS delivery (Phase 7) -------------------------------------------------------
+
+
+def cms_tenants(*, auto_only: bool) -> list[uuid.UUID]:
+    db = new_session()
+    try:
+        with system_scope(db):
+            rows = db.execute(
+                select(Tenant.id, cms.CmsConnection.auto_deliver)
+                .join(cms.CmsConnection, cms.CmsConnection.tenant_id == Tenant.id)
+                .where(Tenant.status == "active", cms.CmsConnection.enabled.is_(True))
+            ).all()
+        return [tid for tid, auto in rows if auto or not auto_only]
+    finally:
+        db.rollback()
+        db.close()
+
+
+def execute_delivery(tenant_id: str, article_id: str) -> dict[str, Any]:
+    from app.modules.visuals.storage import get_storage
+
+    db = new_session()
+    try:
+        tid = uuid.UUID(tenant_id)
+        set_tenant_context(db, tid)
+        d = cms.deliver(db, tenant_id=tid, article_id=uuid.UUID(article_id), storage=get_storage())
+        out = {"status": d.status, "retryable": d.retryable, "remote_id": d.remote_id}
+        db.commit()
+        return out
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@celery_app.task(name="cms.deliver_article")
+def deliver_article(tenant_id: str, article_id: str) -> dict[str, Any]:
+    return execute_delivery(tenant_id, article_id)
+
+
+@celery_app.task(name="cms.deliver_all")
+def cms_deliver_all() -> int:
+    """For tenants with automatic delivery on: queue drafts not yet sent (or temporarily failed)."""
+    queued = 0
+    for tid in cms_tenants(auto_only=True):
+        db = new_session()
+        try:
+            set_tenant_context(db, tid)
+            ids = cms.deliverable_articles(db, tid)
+        finally:
+            db.rollback()
+            db.close()
+        for aid in ids:
+            deliver_article.delay(str(tid), str(aid))
+            queued += 1
+    return queued
+
+
+def execute_sync(tenant_id: str) -> dict[str, int]:
+    db = new_session()
+    try:
+        tid = uuid.UUID(tenant_id)
+        set_tenant_context(db, tid)
+        out = cms.sync(db, tenant_id=tid)
+        db.commit()
+        return out
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@celery_app.task(name="cms.sync_tenant")
+def sync_tenant(tenant_id: str) -> dict[str, int]:
+    return execute_sync(tenant_id)
+
+
+@celery_app.task(name="cms.sync_all")
+def cms_sync_all() -> int:
+    tids = cms_tenants(auto_only=False)
+    for tid in tids:
+        sync_tenant.delay(str(tid))
+    return len(tids)

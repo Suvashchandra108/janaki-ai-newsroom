@@ -11,7 +11,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 4 | Two-angle **English** writing from checked claims, paragraph citations, fabrication flags, SEO/social fields, immutable versions, editor edit/regenerate/reject, usage accounting. Nepali + consistency checks when enabled | **Done — awaiting review** |
 | 5 | Visuals: Wikimedia Commons (licence-first), licence classifier, DB-enforced publishable rules, safe download, Pillow derivatives, local/S3 storage, charts from verified figures, AI-illustration interface with mandatory label, editor selection | **Done — awaiting review** |
 | 6 | Newsroom dashboard (Next.js, ne/en UI) | |
-| 7 | **CMS connector** to the existing JanakiTelevision website (Payload CMS): deliver English drafts as unpublished `draft` articles via a reporter-level bot account; idempotent delivery; status sync back (decision 14 Nov 2026 — replaces building a new CMS) | |
+| 7 | **CMS connector** to the existing JanakiTelevision website (Payload CMS): deliver English drafts as unpublished `draft` articles through a draft-only API-key integration; idempotent delivery; status sync back (decision 14 Nov 2026 — replaces building a new CMS) | **Done — verified end to end against the real website code (15 Nov 2026); website change awaiting review (JanakiTelevision PR #1)** |
 | 8 | SaaS commercial: onboarding, plans, metering, quota enforcement, billing adapter, rate limiting | |
 | 9 | Production deployment, backups + restore test, monitoring, security & load testing | |
 
@@ -26,7 +26,17 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 
 ## Next steps
 
-**Phase 7 — delivery to the JanakiTelevision CMS (next, by owner's choice of order: 5 then 7).** Bot user with draft-only rights and API key on the website side; newsroom connector that creates `draft` articles (aiAssisted, editorialNotes with sources and claim status) plus the selected hero image with caption and credit; idempotent delivery and status sync back.
+1. **Owner review of JanakiTelevision PR #1** (website integration). After merge and deploy: `pnpm migrate` on the server, create the integration in the website admin, paste its key with `cms-connect` (see DEPLOYMENT.md).
+2. Then the owner chooses: **Phase 6** (newsroom dashboard) or **Phase 8/9** (commercial features, production deployment). Pinning the Gemini model id is a small pre-production task either way.
+
+## Phase 7 notes
+
+- Website side (JanakiTelevision, branch `newsroom-bot-drafts`): an `integrations` collection — API key only, not staff, created inactive. It may create **draft** articles (forced `aiAssisted`, unique `newsroomRef`, no byline/sponsorship/publication fields) and upload photos; it cannot edit, delete, publish or list anything else. Enforced in the website's collection access and hooks, not in the newsroom.
+- Newsroom side: `cms_connections` (encrypted key, one per tenant) and `cms_deliveries` (migration `0006`, RLS). Delivery is idempotent: reference `jn-<article id>` is looked up in the CMS before creating, so a retry after a timeout cannot make a duplicate. One delivery per article (the integration cannot edit, so revised versions are not re-sent; the editor edits in the CMS).
+- What is sent: headline, summary, body (Lexical), language, tags, SEO and social text, slug (newsroom slug + 6-character code from the article id, so it does not clash with existing website stories), section (connection mapping, else matched by slug, else left for the editor), the selected licensed hero photo (largest WebP derivative, licence in the photo's internal usage notes) and **internal notes**: warning flags to resolve, alternative headline, every fact used with its claim status and source links, photo licence. Byline is never sent.
+- Articles with status `draft` or `needs_review` can be delivered; `rejected` never. Automatic hourly delivery (:50) is **off by default** per tenant; status sync runs hourly (:55) for 30 days after delivery (draft → … → published, or removed).
+- The CMS address goes through the SSRF guard (public addresses only, https, no redirects); private addresses only with `CMS_ALLOW_PRIVATE_HOSTS`, refused in staging/production.
+- The live end-to-end test found two real problems that fakes could not: the integration could not read its own record (`/api/integrations/me`), and repeated headlines produced a slug clash. Both fixed.
 
 ## Phase 5 notes
 
@@ -55,7 +65,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | Newsroom (Phase 4) | Website field | Limit / rule |
 |---|---|---|
 | headline | `title` | |
-| slug | `slug` | |
+| slug | `slug` | + `-<6 chars of article id>` (website slugs are unique) |
 | summary | `summary` | needed to publish |
 | body paragraphs | `body` (Lexical rich text) | converted at delivery |
 | language `en` | `language` | |
@@ -67,7 +77,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | — | `status` | always `draft`; the newsroom never sets inReview/approved/published |
 | sources, claim statuses, alternative headline, angle | `editorialNotes` | internal only, never published |
 
-Website-side work needed in Phase 7 (in the JanakiTelevision repo, reviewed separately): a reporter-role bot user with API-key access (Payload `useAPIKey` is not enabled today).
+Implemented in Phase 7 with one change: instead of a reporter-role user, the website has a separate **integration** account type with narrower rights (drafts and photos only), and the slug gets a short suffix. See Phase 7 notes.
 
 ## Phase 3 notes
 

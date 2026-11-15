@@ -67,6 +67,12 @@ Settings are applied with `set_config(..., true)` (transaction-local), so a pool
 |---|---|---|---|
 | `media_assets` | `event_id`, `article_id`, `role` (hero/inline), `kind` (photo/illustration/chart), `status` (candidate/selected/rejected), provenance (`provider`, `source_page_url`, `original_url`, `title`, `creator`, `credit`, `retrieved_at`), licence (`licence_name`, `licence_url`, `attribution_required`, `attribution_text`, `commercial_use`, `modification_allowed`, `restrictions[]`, `publishable`, `licence_notes`), `ai_generated`, `label`, `chart_spec`, file (`mime`, `width`, `height`, `sha256`, `storage_key`, `derivatives`, `processing_history`), `caption`, `selected_by/at` | Yes | CHECKs: publishable needs licence URL + commercial use + attribution (own charts/AI exempt); AI ⇒ illustration with label; selected ⇒ publishable |
 
+## 3f. Phase 7 tables (implemented — migration `0006_cms_delivery`)
+
+- `cms_connections` — one per tenant: `kind` (`payload`), `base_url`, `api_key_encrypted` (Fernet), `api_key_last4`, `enabled`, `auto_deliver`, `category_map` (JSONB), `last_ok_at`, `last_error`.
+- `cms_deliveries` — one per article (unique `tenant_id, article_id`; globally unique `newsroom_ref`): `version`, `status` (pending/delivered/failed), `attempts`, `retryable`, `last_error`, `remote_id`, `remote_media_id`, `remote_status` (CHECK: website statuses + `removed`), `remote_published_at`, `delivered_at`, `synced_at`, `requested_by`.
+- Both: RLS policy `tenant_isolation`; app role SELECT/INSERT/UPDATE only.
+
 ## 4. Full planned entity–relationship diagram
 
 ```mermaid

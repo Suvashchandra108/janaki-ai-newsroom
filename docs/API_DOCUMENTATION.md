@@ -100,6 +100,17 @@ There is no approve/publish endpoint: approval and publication happen in the web
 | POST `/events/{id}/media/illustration` | `media.manage`, human only | AI illustration (503 until a provider is configured; 409 while usable photos exist; 429 over daily limit) |
 | GET `/media/{id}/files/{name}` | `articles.read` | Source copy or derivative (`w800.webp` …), own organisation only |
 
+## Phase 7 endpoints (implemented)
+
+| Method & path | Permission | Purpose |
+|---|---|---|
+| GET `/cms/connection` | `cms.manage` | Website CMS address, flags, section map, last 4 characters of the key, last error (the key itself is never returned) |
+| PUT `/cms/connection` | `cms.manage`, human only | `{base_url, api_key?, enabled, auto_deliver, category_map?}`; saves (key encrypted) and checks it: `{connection, ok, detail}` |
+| POST `/cms/connection/check` | `cms.manage` | Re-checks the key against the CMS (`/api/integrations/me`, must be active) |
+| POST `/articles/{id}/deliver` | `articles.edit` | Sends the article as an unpublished draft; idempotent. 409 if not connected or the article is rejected. CMS failures are returned in the delivery (`status: failed`, `retryable`, `last_error`) |
+| GET `/articles/{id}/delivery` | `articles.read` | Delivery record incl. `remote_status` (draft, inReview, approved, scheduled, published, archived, removed) |
+| POST `/cms/sync` | `cms.manage` | Refresh statuses from the CMS now (also hourly) |
+
 Platform admins deliberately have **no** access to tenant newsroom data through tenant endpoints.
 
 ## Example
@@ -111,4 +122,4 @@ curl -s -X POST localhost:8000/api/v1/auth/login -H 'Content-Type: application/j
 
 ## Planned endpoint groups
 
-`/notifications` (P6) · `/cms`, `/publishing` (P7) · `/usage`, `/subscriptions` (P8).
+`/notifications` (P6) · `/usage`, `/subscriptions` (P8).

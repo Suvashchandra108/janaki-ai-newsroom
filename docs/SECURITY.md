@@ -37,6 +37,7 @@ Tenant articles and drafts (pre-publication material is commercially and legally
 4. Platform-admin endpoints (tenant provisioning, tenant list).
 6. Scheduler: listing active tenants to enqueue hourly discovery (`app/worker.py: due_tenants`).
 5. Bootstrap scripts.
+7. Scheduler: listing tenants with an enabled CMS connection (`app/worker.py: cms_tenants`).
 
 Residual risk, stated honestly: RLS session variables protect against application-logic mistakes (missing filters). They do not protect against an attacker who achieves arbitrary SQL execution as the app role, since that attacker could call `set_config`. SQL injection is mitigated separately by using only bound parameters via SQLAlchemy.
 
@@ -51,6 +52,13 @@ Residual risk, stated honestly: RLS session variables protect against applicatio
 - CORS restricted to configured origins.
 - Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, strict CSP on API responses).
 - Startup refuses to run in `production` with default/weak secrets.
+
+## 4b. Website CMS delivery (Phase 7)
+
+- The newsroom never approves or publishes. It holds a key for a website **integration** that can only create drafts and upload photos; those limits are enforced by the website itself (JanakiTelevision `docs/AI_NEWSROOM.md`), so a compromised newsroom still cannot publish.
+- The key is stored encrypted (Fernet, `MFA_ENCRYPTION_KEY`), shown only as its last 4 characters, and entered through `PUT /cms/connection` or `cms-connect` (hidden prompt or `CMS_API_KEY` env var), never in code or logs. Only humans with `cms.manage` can change it.
+- The tenant-supplied CMS address is an SSRF risk; it uses the same guard as news fetching: https only, no IP literals, no credentials or paths, standard ports, DNS resolved and pinned with every address checked public, redirects refused, responses capped at 2 MB. `CMS_ALLOW_PRIVATE_HOSTS` (local testing) is refused at startup in staging/production.
+- Internal notes sent to the CMS contain only public source URLs, claim statuses and the newsroom's own flags — no user data.
 
 ## 5. Not yet implemented (tracked)
 

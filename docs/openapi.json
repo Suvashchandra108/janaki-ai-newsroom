@@ -2371,6 +2371,199 @@
           }
         }
       }
+    },
+    "/api/v1/cms/connection": {
+      "get": {
+        "tags": [
+          "cms"
+        ],
+        "summary": "Get Connection",
+        "operationId": "get_connection_api_v1_cms_connection_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionOut"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "cms"
+        ],
+        "summary": "Put Connection",
+        "operationId": "put_connection_api_v1_cms_connection_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionStatusOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cms/connection/check": {
+      "post": {
+        "tags": [
+          "cms"
+        ],
+        "summary": "Check Connection",
+        "operationId": "check_connection_api_v1_cms_connection_check_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionStatusOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{article_id}/deliver": {
+      "post": {
+        "tags": [
+          "cms"
+        ],
+        "summary": "Deliver Article",
+        "description": "Send the article to the website CMS as an unpublished draft (people publish there).",
+        "operationId": "deliver_article_api_v1_articles__article_id__deliver_post",
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Article Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/articles/{article_id}/delivery": {
+      "get": {
+        "tags": [
+          "cms"
+        ],
+        "summary": "Get Delivery",
+        "operationId": "get_delivery_api_v1_articles__article_id__delivery_get",
+        "parameters": [
+          {
+            "name": "article_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Article Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cms/sync": {
+      "post": {
+        "tags": [
+          "cms"
+        ],
+        "summary": "Sync Now",
+        "operationId": "sync_now_api_v1_cms_sync_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "type": "object",
+                  "title": "Response Sync Now Api V1 Cms Sync Post"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2907,6 +3100,278 @@
           "reviewed_at"
         ],
         "title": "ClaimOut"
+      },
+      "ConnectionIn": {
+        "properties": {
+          "base_url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Base Url",
+            "examples": [
+              "https://janakitelevision.com"
+            ]
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "auto_deliver": {
+            "type": "boolean",
+            "title": "Auto Deliver",
+            "default": false
+          },
+          "category_map": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Map"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url"
+        ],
+        "title": "ConnectionIn"
+      },
+      "ConnectionOut": {
+        "properties": {
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "auto_deliver": {
+            "type": "boolean",
+            "title": "Auto Deliver"
+          },
+          "category_map": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Category Map"
+          },
+          "api_key_last4": {
+            "type": "string",
+            "title": "Api Key Last4"
+          },
+          "last_ok_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Ok At"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base_url",
+          "kind",
+          "enabled",
+          "auto_deliver",
+          "category_map",
+          "api_key_last4",
+          "last_ok_at",
+          "last_error"
+        ],
+        "title": "ConnectionOut"
+      },
+      "ConnectionStatusOut": {
+        "properties": {
+          "connection": {
+            "$ref": "#/components/schemas/ConnectionOut"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connection",
+          "ok",
+          "detail"
+        ],
+        "title": "ConnectionStatusOut"
+      },
+      "DeliveryOut": {
+        "properties": {
+          "article_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Article Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "newsroom_ref": {
+            "type": "string",
+            "title": "Newsroom Ref"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "remote_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Id"
+          },
+          "remote_media_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Media Id"
+          },
+          "remote_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Status"
+          },
+          "remote_published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Published At"
+          },
+          "delivered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivered At"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Synced At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "article_id",
+          "version",
+          "newsroom_ref",
+          "status",
+          "attempts",
+          "retryable",
+          "last_error",
+          "remote_id",
+          "remote_media_id",
+          "remote_status",
+          "remote_published_at",
+          "delivered_at",
+          "synced_at"
+        ],
+        "title": "DeliveryOut"
       },
       "DocumentOut": {
         "properties": {
@@ -4994,8 +5459,8 @@
               {
                 "type": "string",
                 "enum": [
-                  "ne",
-                  "en"
+                  "en",
+                  "ne"
                 ]
               },
               {

@@ -28,6 +28,8 @@ stateDiagram-v2
 
 Transitions marked *human editor only* require a human user holding `articles.approve` / `articles.publish`.
 
+**With the JanakiTelevision website (Phase 7):** review, approval and publication happen in the website CMS, not here. The newsroom delivers a draft (newsroom status becomes `delivered`), the website keeps it as an unpublished *Draft* marked *AI suggestion used*, and a Janaki editor checks the internal notes (flags, facts and sources), adds byline and section, and publishes. The newsroom only reads the result back (`remote_status`). Rejected articles are never delivered.
+
 ## Who can do what (system roles)
 
 | Action | Tenant admin | Editor | Reviewer | Reporter | Service account / API key |

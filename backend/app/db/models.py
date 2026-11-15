@@ -3,6 +3,7 @@
 from app.db.base import Base
 from app.modules.ai_gateway.models import UsageRecord
 from app.modules.audit.models import AuditLog
+from app.modules.cms.models import CmsConnection, CmsDelivery
 from app.modules.discovery.models import BackgroundJob, DiscoveredItem, NewsEvent, NewsSource
 from app.modules.editorial.models import Article, ArticleVersion
 from app.modules.identity.models import (
@@ -27,6 +28,8 @@ __all__ = [
     "BackgroundJob",
     "Base",
     "Claim",
+    "CmsConnection",
+    "CmsDelivery",
     "DiscoveredItem",
     "Evidence",
     "MediaAsset",

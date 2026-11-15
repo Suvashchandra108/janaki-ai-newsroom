@@ -37,6 +37,21 @@ python -c "import json; from app.main import app; json.dump(app.openapi(), open(
 
 The first CI run (commit `5bcc45a`) failed and exposed two real defects the sandbox could not: the package was not installable (`pip install .`, also used by the Dockerfile), and a lint auto-fix had unregistered the discovery models from Alembic's metadata. Both fixed in `e5db466`; `tests/test_metadata.py` now guards the registry.
 
+## Phase 7 results (actually executed, 15 Nov 2026)
+
+| Check | Result |
+|---|---|
+| `pytest` (Phases 1–7) | **208 passed**, 4 skipped (live checks), 95% coverage |
+| `ruff` / `mypy` | clean / no issues (67 files) |
+| Migration `0006` up → down → up, `alembic check` | clean, no drift |
+| **Live end-to-end** (`tests/test_live_cms.py`) against the real JanakiTelevision code (`pnpm dev`, migration-only database, real integration and API key), run twice | **2 passed both times**: draft created with photo; status draft, AI-labelled, no byline, not public; sources and claim statuses in internal notes; licence on the photo; the integration was refused publish, edit, delete and create-as-published; re-delivery made no duplicate; an administrator published and the newsroom's sync saw `published` |
+| Found by the live run | integrations could not read their own record (`/api/integrations/me` → 403; fixed on the website); a repeated headline caused a website slug clash (fixed: slug gets a 6-character code from the article id) |
+| Website suite on the branch | 115 integration tests passed; unit tests 211 passed, 3 pre-existing `backup.test.ts` failures that also fail on unmodified `main` in this environment |
+
+The live end-to-end test needs a running website and is **not** part of GitHub CI. Run it with `CMS_E2E_URL`, `CMS_E2E_KEY` and `CMS_E2E_ADMIN_TOKEN` (local or staging site only; see the test's docstring).
+
+Phase 7 coverage (in CI, with an in-memory fake CMS): address rules (https, no paths, credentials, IPs or odd ports; private hosts only with the dev flag; production refuses the flag); internal addresses blocked at connection time; Lexical structure; delivery content and limits; section mapping by slug or left empty; idempotency; recovery after a lost response without a duplicate; CMS rejection recorded and not retried; wrong key; rejected articles never delivered; no connection → 409; status sync incl. published and removed; connection API admin/human-only, key never returned and encrypted at rest, unsafe address refused; tenant isolation; automatic delivery only when switched on.
+
 ## Phase 5 results (actually executed, 14 Nov 2026)
 
 | Check | Result |

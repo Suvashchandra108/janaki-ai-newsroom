@@ -1,1 +1,1 @@
-"""Planned module — see docs/DEVELOPMENT_ROADMAP.md. Not implemented in Phase 1."""
+"""Website CMS delivery (Phase 7): drafts into the tenant's CMS, status back."""

@@ -70,6 +70,11 @@ class Settings(BaseSettings):
         "newsroom@janaki-newsroom.example.com"  # sent in User-Agent per API etiquette
     )
 
+    # Website CMS delivery (Phase 7). Private/loopback CMS addresses are for local development
+    # and tests only; refused in staging and production.
+    cms_allow_private_hosts: bool = False
+    cms_timeout_seconds: float = 20.0
+
     # Research (Phase 3)
     research_max_documents_per_event: int = 6
     research_max_claims_per_document: int = 8
@@ -85,6 +90,8 @@ class Settings(BaseSettings):
             ]
             if self.mfa_encryption_key == Settings.model_fields["mfa_encryption_key"].default:
                 weak.append("mfa_encryption_key")
+            if self.cms_allow_private_hosts:
+                weak.append("cms_allow_private_hosts (must be false)")
             if weak:
                 raise ValueError(f"Insecure secrets for {self.environment}: {', '.join(weak)}")
         return self

@@ -4,6 +4,8 @@
     python -m scripts.bootstrap tenant --slug janaki-tv --name "Janaki Television" \
         --admin-email admin@janakitv.example.com --admin-name "Janaki Admin"
     python -m scripts.bootstrap sources --tenant janaki-tv --file ../deploy/feeds/approved.json
+    python -m scripts.bootstrap cms-connect --tenant janaki-tv --url https://janakitelevision.com
+        (API key from CMS_API_KEY or a hidden prompt; add --auto to deliver drafts every hour)
 """
 
 from __future__ import annotations
@@ -66,6 +68,29 @@ def import_sources(db: Session, tenant_slug: str, path: str) -> None:
     print(f"Imported {added} sources into {tenant_slug} ({skipped} already present).")
 
 
+def connect_cms(db: Session, tenant_slug: str, url: str, auto: bool) -> None:
+    from app.modules.cms import service as cms
+    from app.modules.cms.payload import CmsError
+
+    with system_scope(db):
+        tenant = db.scalar(select(Tenant).where(Tenant.slug == tenant_slug))
+    if tenant is None:
+        sys.exit(f"No tenant {tenant_slug!r}")
+    set_tenant_context(db, tenant.id)
+    key = os.environ.get("CMS_API_KEY") or getpass.getpass("CMS integration API key (hidden): ")
+    conn = cms.configure(db, tenant_id=tenant.id, base_url=url, api_key=key, auto_deliver=auto)
+    try:
+        who = cms.check_connection(cms.default_client(conn))
+    except CmsError as exc:
+        conn.last_error = exc.message[:500]
+        print(f"Saved, but the check failed: {exc.message}")
+        return
+    print(
+        f"Connected {tenant_slug} to {conn.base_url} as integration “{who['integration']}” "
+        f"(key …{conn.api_key_last4}; automatic delivery {'on' if auto else 'off'})."
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -81,6 +106,10 @@ def main() -> None:
     so = sub.add_parser("sources", help="import approved RSS sources (skips existing feeds)")
     so.add_argument("--tenant", required=True)
     so.add_argument("--file", required=True)
+    cm = sub.add_parser("cms-connect", help="connect the website CMS (Payload integration key)")
+    cm.add_argument("--tenant", required=True)
+    cm.add_argument("--url", required=True)
+    cm.add_argument("--auto", action="store_true", help="deliver new drafts every hour")
     args = parser.parse_args()
 
     db = new_session()
@@ -92,6 +121,8 @@ def main() -> None:
             print(f"Platform admin created: {user.id}. Sign in and enrol MFA immediately.")
         elif args.cmd == "sources":
             import_sources(db, args.tenant, args.file)
+        elif args.cmd == "cms-connect":
+            connect_cms(db, args.tenant, args.url, args.auto)
         else:
             tenant, admin = provision_tenant(
                 db,

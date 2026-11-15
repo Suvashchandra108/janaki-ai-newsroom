@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0] — 2026-11-15 — Phase 7: delivery to the JanakiTelevision CMS
+- `cms_connections` and `cms_deliveries` (migration `0006`, RLS); API key encrypted at rest, never returned.
+- Payload REST client behind the SSRF guard (public https only, pinned DNS, no redirects, size cap); private hosts only with `CMS_ALLOW_PRIVATE_HOSTS` (refused in staging/production).
+- Draft delivery: Lexical body, SEO/social/tags within the website's limits, section mapping, licensed hero photo upload, internal notes with flags, facts, claim statuses and source links; idempotent via `jn-<article id>`; temporary failures retried, rejections recorded.
+- Status sync back (draft → published / removed); hourly tasks (delivery off by default, sync on).
+- API: `GET/PUT /cms/connection`, `POST /cms/connection/check`, `POST /articles/{id}/deliver`, `GET /articles/{id}/delivery`, `POST /cms/sync`. Bootstrap: `cms-connect`.
+- Website change (JanakiTelevision PR #1): draft-only API-key integration, tested there (115 integration tests) and end to end.
+- 208 tests passing (+2 live end-to-end tests, run against the real website code locally).
+
 ## [0.5.0] — 2026-11-14 — Phase 5: visuals
 - Writing checks tightened after the first live draft: unattributed single-source claims are warnings; cause-and-effect wording not present in sources is flagged (`unsupported_causal_link`).
 - `media_assets` table (migration `0005`, RLS) with CHECK constraints: unlicensed images cannot be publishable or selected; AI images must carry the label.
