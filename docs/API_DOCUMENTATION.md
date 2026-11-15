@@ -100,6 +100,15 @@ There is no approve/publish endpoint: approval and publication happen in the web
 | POST `/events/{id}/media/illustration` | `media.manage`, human only | AI illustration (503 until a provider is configured; 409 while usable photos exist; 429 over daily limit) |
 | GET `/media/{id}/files/{name}` | `articles.read` | Source copy or derivative (`w800.webp` …), own organisation only |
 
+## Phase 6 endpoints (implemented)
+
+| Method & path | Permission | Purpose |
+|---|---|---|
+| GET `/dashboard/summary` | `events.read` | Counts for the dashboard (today in the tenant's time zone): discovery and quota, pipeline, drafts awaiting review, sent/published on the website, failed jobs (24 h) and deliveries, AI calls and tokens (no cost: no price list configured), search provider, images, CMS status. Computed from the same tables as the other endpoints |
+| GET `/dashboard/notifications?limit=` | `events.read` | Last 7 days, newest first: `job_failed`, `draft_ready`, `sent_to_website`, `delivery_failed`, `website_status` — derived from jobs, articles and the audit log (nothing stored separately) |
+| GET `/events?status=` | `events.read` | New filter by event status |
+| GET `/discovery/jobs?status=&job_type=` | `events.read` | New filters (e.g. failed only) |
+
 ## Phase 7 endpoints (implemented)
 
 | Method & path | Permission | Purpose |

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0] — 2026-11-15 — Phase 6: newsroom dashboard
+- `frontend/`: Next.js 16 + TypeScript + Tailwind 4 dashboard, English and Nepali interface, desktop and phone.
+- Screens: dashboard, news inbox, story research (facts, evidence, editor verification, photos), drafts, draft review (flags, cited facts with sources, edit → new version, regenerate, reject, send to website, photo licence, SEO/social, revision history, language tabs), jobs (failed jobs, run/pause discovery), sources, usage, website CMS, users, settings, two-factor enrolment.
+- Security: server-side session (httpOnly cookies, no token in the browser), same-origin BFF with path allow-list, CSRF origin check, CSP.
+- API: `GET /dashboard/summary`, `GET /dashboard/notifications`, status filters on events and jobs.
+- Tests: 5 backend dashboard tests; 10 frontend unit tests; 14 browser tests against the real API and a seeded database (also in CI).
+- Bugs found by the browser tests and fixed: redirects pointed at the server's internal host name; the phone menu stayed open after navigating; long unbroken text widened the page; buttons could be pressed before they worked.
+
 ## [0.7.0] — 2026-11-15 — Phase 7: delivery to the JanakiTelevision CMS
 - `cms_connections` and `cms_deliveries` (migration `0006`, RLS); API key encrypted at rest, never returned.
 - Payload REST client behind the SSRF guard (public https only, pinned DNS, no redirects, size cap); private hosts only with `CMS_ALLOW_PRIVATE_HOSTS` (refused in staging/production).

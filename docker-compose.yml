@@ -66,6 +66,16 @@ services:
       redis: {condition: service_started}
 
   # Object storage for Phase 5 (media). Start with: docker compose --profile media up
+  dashboard:
+    build: ./frontend
+    environment:
+      NEWSROOM_API_URL: http://api:8000
+      # Session cookies are Secure: put the dashboard behind HTTPS (or set COOKIE_SECURE=false
+      # only for local testing over plain http).
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    ports: ["3100:3100"]
+    depends_on: [api]
+
   minio:
     image: minio/minio
     profiles: ["media"]

@@ -14,8 +14,9 @@ First tenant: **Janaki Television**.
 | 3 | Research & evidence (article retrieval, grounded AI claim extraction, rule-based corroboration, editor review) | ✅ done, awaiting review |
 | 4 | English AI writing: two angles, claim citations, fabrication flags, editor versions | ✅ done, awaiting review |
 | 5 | Visuals: licensed photos (Wikimedia Commons), charts from verified figures, AI-illustration rules | ✅ done, awaiting review |
-| 7 | Delivery of drafts to the existing JanakiTelevision CMS | next |
-| 6, 8, 9 | Dashboard, billing, production | planned |
+| 7 | Delivery of drafts to the existing JanakiTelevision CMS (website side: JanakiTelevision PR #1) | ✅ done, verified end to end |
+| 6 | Newsroom dashboard (Next.js, English + Nepali interface) | ✅ done, browser-tested against the real API |
+| 8, 9 | Billing, production | planned |
 
 **Language:** English-only at launch (decision 14 Nov 2026). Nepali will be enabled later per tenant.
 
@@ -38,7 +39,7 @@ Native Python and test instructions: [docs/TESTING.md](docs/TESTING.md).
 
 ```
 backend/   FastAPI modular monolith (app/), Alembic migrations, scripts, tests
-frontend/  Next.js dashboard and public site (Phase 6–7)
+frontend/  Next.js newsroom dashboard (Phase 6) — see frontend/README.md
 deploy/    Infrastructure helpers (Postgres role init)
 docs/      Architecture, schema, API, security, deployment, roadmap, testing,
            cost model, changelog, editorial workflow, image licensing policy

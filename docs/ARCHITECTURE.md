@@ -89,12 +89,12 @@ flowchart LR
 | Migrations | Alembic, run by a separate DB **owner** role | The runtime **app** role is non-superuser, `NOBYPASSRLS`, and does not own tables, so RLS is genuinely enforced. |
 | Tenant isolation | App-level scoping **and** PostgreSQL RLS keyed on `app.tenant_id` (transaction-local) | Defence in depth: a forgotten `WHERE tenant_id` returns nothing instead of leaking. |
 | Queue | Celery + Redis | Mature beat scheduler, retries, routing by queue (cheap vs expensive AI jobs). |
-| Sessions | 15-min JWT access token + rotating opaque refresh token stored hashed in `auth_sessions` | Revocable (logout, password change, deactivation), no CSRF exposure for bearer APIs. The Next.js app will hold the refresh token in an httpOnly, SameSite=Strict cookie via its own server route (BFF). |
+| Sessions | 15-min JWT access token + rotating opaque refresh token stored hashed in `auth_sessions` | Revocable (logout, password change, deactivation), no CSRF exposure for bearer APIs. The dashboard (Next.js) holds both tokens in httpOnly cookies set by its own server routes (BFF); the browser never sees a token. |
 | Password hashing | Argon2id | Current OWASP recommendation. |
 | MFA | TOTP (RFC 6238), required for tenant admins and platform admins (configurable) | No SMS cost, works offline. |
 | AI | Provider-independent gateway; models chosen by config per task tier | No hard-coded model names; cheap models for classification, stronger for writing. |
 | Object storage | S3-compatible (MinIO locally; any India-region S3-compatible service in prod) | Tenant prefix `tenants/<tenant_id>/…`, signed URLs only. |
-| Frontend | Next.js + TypeScript + Tailwind, next-intl for ne/en | Requirement; built from Phase 6. |
+| Frontend | Next.js 16 + TypeScript + Tailwind 4; a small typed dictionary for en/ne (instead of next-intl: two languages, no routing by locale, one fewer dependency); server components + a same-origin BFF | Built in Phase 6. See frontend/README.md. |
 | Reverse proxy | Caddy | Automatic HTTPS with minimal config. |
 
 ## 5. Request lifecycle and tenant context
@@ -149,7 +149,7 @@ janaki-ai-newsroom/
 │   │       └── billing/        # Phase 8 (planned)
 │   ├── scripts/                # bootstrap platform admin, seed Janaki TV
 │   └── tests/
-└── frontend/                   # Next.js (Phase 6)
+└── frontend/                   # Next.js newsroom dashboard (Phase 6)
 ```
 
 ## 7. Planned module designs (summary)

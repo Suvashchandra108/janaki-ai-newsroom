@@ -37,6 +37,20 @@ python -c "import json; from app.main import app; json.dump(app.openapi(), open(
 
 The first CI run (commit `5bcc45a`) failed and exposed two real defects the sandbox could not: the package was not installable (`pip install .`, also used by the Dockerfile), and a lint auto-fix had unregistered the discovery models from Alembic's metadata. Both fixed in `e5db466`; `tests/test_metadata.py` now guards the registry.
 
+## Phase 6 results (actually executed, 15 Nov 2026)
+
+| Check | Result |
+|---|---|
+| Backend `pytest` | **213 passed**, 6 skipped (4 live checks + 2 live website checks), 95% coverage; `ruff`, `mypy` clean |
+| Frontend `format:check` / `lint` / `typecheck` / `build` | pass |
+| Frontend unit tests (`vitest`) | **10 passed**: same-origin check, API path allow-list, sign-in redirect targets, colour validation, Nepali has every English key and the same placeholders, Devanagari digits, Nepal time |
+| **Browser tests** (`playwright`, Chromium) against the real FastAPI + seeded e2e database + production build | **14 passed**, run three times in a row |
+| `docker compose config` (with the new `dashboard` service) | valid; images not built (no Docker daemon here) |
+
+Browser tests cover: sign-in redirect and wrong password; **dashboard figures equal the backend records** (checked against the seed's own database counts and the API); failed job visible on the dashboard, in the activity feed and in Jobs with its error; review screen (cited facts, publishers, licence, photo served through the BFF as WebP, history); edit → version 2, old version still viewable; send without a website connection explains why; reject with reason; verify a fact with a note; reporter sees no admin screens and the API refuses their reject call; BFF refuses foreign/missing `Origin`, token endpoints, traversal, and no session; administrator signs in with a real TOTP code; a new administrator must enrol two-factor (QR + code) first; Nepali interface (`lang="ne"`) and sign-out; phone menu on six screens with no sideways scrolling; long unbroken text never widens the page.
+
+Found by the browser tests (not by unit tests) and fixed: redirects after sign-in used the server's internal host name, so the session cookie was left behind; the phone menu stayed open after navigating; a long unbroken line widened the whole page; buttons could be pressed before the page's JavaScript was ready. (One false alarm on the way: a stale test server from an earlier build was still holding the port.)
+
 ## Phase 7 results (actually executed, 15 Nov 2026)
 
 | Check | Result |

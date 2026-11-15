@@ -60,6 +60,15 @@ Residual risk, stated honestly: RLS session variables protect against applicatio
 - The tenant-supplied CMS address is an SSRF risk; it uses the same guard as news fetching: https only, no IP literals, no credentials or paths, standard ports, DNS resolved and pinned with every address checked public, redirects refused, responses capped at 2 MB. `CMS_ALLOW_PRIVATE_HOSTS` (local testing) is refused at startup in staging/production.
 - Internal notes sent to the CMS contain only public source URLs, claim statuses and the newsroom's own flags — no user data.
 
+## 4c. Dashboard (Phase 6)
+
+- No token in the browser: the dashboard's server stores the access token (`jn_at`, httpOnly, SameSite=Lax) and the refresh token (`jn_rt`, httpOnly, SameSite=Strict, path `/auth` only); both `Secure` in production. Refresh rotates the session through the API (reuse detection unchanged).
+- CSRF: every state-changing request to the dashboard (`/bff/*`, `/auth/login`, `/auth/logout`) must carry an `Origin` equal to the dashboard's host, else 403 — checked in `src/lib/guards.ts` and tested in the browser (foreign and missing `Origin` refused).
+- The BFF forwards only `/api/v1/...` paths made of plain segments (no `..`, no encoded slashes, max 8), never the token endpoints, never the browser's cookies, with a 1 MB body limit and no redirects followed.
+- Redirect targets after sign-in are same-site paths only (`safeNext`); tenant brand colours are accepted as hex only before reaching CSS.
+- Headers: CSP (`default-src 'self'`, no third-party scripts; inline scripts allowed for Next.js hydration), `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: same-origin`.
+- Hiding buttons is convenience only; the API refuses (tested: a reporter's reject call through the BFF returns 403).
+
 ## 5. Not yet implemented (tracked)
 
-IP-level rate limiting, CSRF tokens for the cookie-based BFF (Phase 6), host-level egress firewall, research-text retention purge, upload scanning, encrypted backups, dependency scanning in CI (`pip-audit`, `npm audit`), WebAuthn, password breach checks (HIBP k-anonymity), external penetration test.
+IP-level rate limiting, host-level egress firewall, research-text retention purge, upload scanning, encrypted backups, dependency scanning in CI (`pip-audit`, `npm audit`), WebAuthn, password breach checks (HIBP k-anonymity), external penetration test.

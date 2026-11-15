@@ -250,6 +250,8 @@ def resume(
 
 @disc.get("/jobs", response_model=list[JobOut])
 def list_jobs(
+    job_status: str | None = Query(default=None, alias="status", max_length=20),
+    job_type: str | None = Query(default=None, max_length=30),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
@@ -257,7 +259,11 @@ def list_jobs(
 ) -> list[JobOut]:
     rows = db.scalars(
         select(BackgroundJob)
-        .where(BackgroundJob.tenant_id == principal.tenant_id)
+        .where(
+            BackgroundJob.tenant_id == principal.tenant_id,
+            *([BackgroundJob.status == job_status] if job_status else []),
+            *([BackgroundJob.job_type == job_type] if job_type else []),
+        )
         .order_by(BackgroundJob.created_at.desc())
         .limit(limit)
         .offset(offset)
@@ -286,6 +292,7 @@ def list_items(
 @events.get("", response_model=list[EventOut])
 def list_events(
     min_publishers: int = Query(default=1, ge=1),
+    event_status: str | None = Query(default=None, alias="status", max_length=30),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
@@ -294,7 +301,9 @@ def list_events(
     rows = db.scalars(
         select(NewsEvent)
         .where(
-            NewsEvent.tenant_id == principal.tenant_id, NewsEvent.publisher_count >= min_publishers
+            NewsEvent.tenant_id == principal.tenant_id,
+            NewsEvent.publisher_count >= min_publishers,
+            *([NewsEvent.status == event_status] if event_status else []),
         )
         .order_by(NewsEvent.last_seen_at.desc())
         .limit(limit)

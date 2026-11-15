@@ -12,6 +12,7 @@ from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1.cms_routes import router as cms_router
+from app.api.v1.dashboard_routes import router as dashboard_router
 from app.api.v1.discovery_routes import ALL_DISCOVERY_ROUTERS
 from app.api.v1.editorial_routes import router as editorial_router
 from app.api.v1.media_routes import router as media_router
@@ -120,6 +121,7 @@ def create_app() -> FastAPI:
         editorial_router,
         media_router,
         cms_router,
+        dashboard_router,
     ]:
         app.include_router(router, prefix="/api/v1")
     return app

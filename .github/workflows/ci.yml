@@ -57,3 +57,94 @@ jobs:
       - name: Live Gemini check (details)
         if: env.GEMINI_API_KEY != ''
         run: pytest -p no:warnings -s tests/test_live_ai.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  dashboard-e2e:
+    # Real browser against the real API and a seeded throwaway database.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 10
+    env:
+      PGPASSWORD: postgres
+      ENVIRONMENT: test
+      TEST_DATABASE_URL: postgresql+psycopg://janaki_app:app_dev_pw@localhost:5432/janaki_e2e
+      TEST_DATABASE_OWNER_URL: postgresql+psycopg://janaki_owner:owner_dev_pw@localhost:5432/janaki_e2e
+      DATABASE_URL: postgresql+psycopg://janaki_app:app_dev_pw@localhost:5432/janaki_e2e
+      DATABASE_OWNER_URL: postgresql+psycopg://janaki_owner:owner_dev_pw@localhost:5432/janaki_e2e
+      STORAGE_LOCAL_ROOT: /tmp/e2e-media
+      NEWSROOM_API_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Database roles
+        run: |
+          psql -h localhost -U postgres -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE janaki_owner LOGIN PASSWORD 'owner_dev_pw';
+          CREATE ROLE janaki_app LOGIN PASSWORD 'app_dev_pw' NOSUPERUSER NOBYPASSRLS;
+          CREATE DATABASE janaki_e2e OWNER janaki_owner;
+          SQL
+      - name: Backend install and seed
+        working-directory: backend
+        run: |
+          pip install -e ".[dev]"
+          python -m tests.e2e_seed > ../frontend/seed.json
+      - name: Start API
+        working-directory: backend
+        run: |
+          nohup uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/health && break; sleep 1; done
+      - name: Build and start dashboard
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          PORT=3100 HOSTNAME=127.0.0.1 COOKIE_SECURE=false nohup node .next/standalone/server.js > /tmp/dash.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:3100/login && break; sleep 1; done
+      - name: Browser tests
+        working-directory: frontend
+        env:
+          BASE_URL: http://127.0.0.1:3100
+          SEED_FILE: seed.json
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm exec playwright test
+      - name: Server logs on failure
+        if: failure()
+        run: tail -100 /tmp/api.log /tmp/dash.log

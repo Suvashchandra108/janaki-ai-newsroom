@@ -25,6 +25,10 @@ open http://localhost:8000/api/docs
 Without Docker: start PostgreSQL 16 and Redis, create the roles from TESTING.md, then
 `cd backend && alembic upgrade head && uvicorn app.main:app --reload`.
 
+## Dashboard (Phase 6)
+
+`docker compose up dashboard` serves it on port 3100 (`NEWSROOM_API_URL=http://api:8000`). Put it behind HTTPS: its session cookies are `Secure`. Only for local testing over plain http set `COOKIE_SECURE=false`. Without Docker: `cd frontend && pnpm install && pnpm build && NEWSROOM_API_URL=… pnpm start`.
+
 ## Connecting the JanakiTelevision website (Phase 7)
 
 1. On the website (after JanakiTelevision PR #1 is merged and deployed, and `pnpm migrate` has run): Administration → Integrations → Create “AI newsroom”, tick *Enable API key*, save, copy the key.

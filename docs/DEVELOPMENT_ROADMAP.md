@@ -10,7 +10,7 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 | 3 | Research & evidence: article retrieval (robots.txt), grounded claim extraction, corroboration, conflict detection, rule-based statuses, evidence review API, usage ledger | **Done — verified in CI (14 Nov 2026), awaiting review** |
 | 4 | Two-angle **English** writing from checked claims, paragraph citations, fabrication flags, SEO/social fields, immutable versions, editor edit/regenerate/reject, usage accounting. Nepali + consistency checks when enabled | **Done — awaiting review** |
 | 5 | Visuals: Wikimedia Commons (licence-first), licence classifier, DB-enforced publishable rules, safe download, Pillow derivatives, local/S3 storage, charts from verified figures, AI-illustration interface with mandatory label, editor selection | **Done — awaiting review** |
-| 6 | Newsroom dashboard (Next.js, ne/en UI) | |
+| 6 | Newsroom dashboard (Next.js, ne/en UI) | **Done — browser-tested against the real API (15 Nov 2026)** |
 | 7 | **CMS connector** to the existing JanakiTelevision website (Payload CMS): deliver English drafts as unpublished `draft` articles through a draft-only API-key integration; idempotent delivery; status sync back (decision 14 Nov 2026 — replaces building a new CMS) | **Done — verified end to end against the real website code (15 Nov 2026); website change awaiting review (JanakiTelevision PR #1)** |
 | 8 | SaaS commercial: onboarding, plans, metering, quota enforcement, billing adapter, rate limiting | |
 | 9 | Production deployment, backups + restore test, monitoring, security & load testing | |
@@ -26,8 +26,18 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 
 ## Next steps
 
-1. **Owner review of JanakiTelevision PR #1** (website integration). After merge and deploy: `pnpm migrate` on the server, create the integration in the website admin, paste its key with `cms-connect` (see DEPLOYMENT.md).
-2. Then the owner chooses: **Phase 6** (newsroom dashboard) or **Phase 8/9** (commercial features, production deployment). Pinning the Gemini model id is a small pre-production task either way.
+1. **Owner review** of the dashboard (screenshots in the 15 Nov checkpoint) and of JanakiTelevision PR #1.
+2. **Phase 8 or 9**, owner's choice: commercial features (plans, metering, billing) or production deployment (server, HTTPS, backups, monitoring). The dashboard needs HTTPS in production (its cookies are `Secure`).
+3. Small pre-production tasks: pin the Gemini model id; build the Docker images in CI.
+
+## Phase 6 notes
+
+- Approve/publish buttons are deliberately absent: approval and publication happen in the website CMS (decision 14 Nov 2026). The review screen has **Send to website as draft** instead, and says so.
+- Language tabs: English is active; the Nepali tab is shown disabled until Nepali drafts are enabled.
+- Spending: tokens and calls are exact; money is not shown because no price list is configured (no invented figures).
+- Notifications are an activity feed derived from existing records (no notification table, no email/push yet).
+- Theme: `tenants.settings.theme.primary` / `.accent` (hex only).
+- Not built yet: infographics editor, categories screen, API-key management screen, billing.
 
 ## Phase 7 notes
 
