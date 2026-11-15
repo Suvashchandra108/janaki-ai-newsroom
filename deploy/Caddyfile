@@ -1,0 +1,7 @@
+# The dashboard, with automatic Let's Encrypt HTTPS once DNS for $NEWSROOM_DOMAIN points here.
+# The API is not published; the dashboard reaches it on the private network.
+{$NEWSROOM_DOMAIN} {
+	encode zstd gzip
+	header -Server
+	reverse_proxy dashboard:3100
+}

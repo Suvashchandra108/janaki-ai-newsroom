@@ -149,3 +149,53 @@ jobs:
       - name: Server logs on failure
         if: failure()
         run: tail -100 /tmp/api.log /tmp/dash.log
+
+  deploy-smoke:
+    # Builds the production images and starts deploy/docker-compose.prod.yml exactly as the
+    # server will (Caddy on plain http here, since CI has no domain), then signs in.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Production settings for the smoke test
+        run: |
+          cp deploy/.env.production.example deploy/.env.production
+          gen() { openssl rand -base64 48 | tr -d '\n/+=' | cut -c1-48; }
+          fernet=$(openssl rand -base64 32 | tr '+/' '-_')
+          sed -i "s|^NEWSROOM_DOMAIN=.*|NEWSROOM_DOMAIN=:80|" deploy/.env.production
+          for k in POSTGRES_SUPERUSER_PASSWORD DB_OWNER_PASSWORD DB_APP_PASSWORD JWT_SECRET API_KEY_PEPPER; do
+            sed -i "s|^$k=.*|$k=$(gen)|" deploy/.env.production
+          done
+          sed -i "s|^MFA_ENCRYPTION_KEY=.*|MFA_ENCRYPTION_KEY=$fernet|" deploy/.env.production
+          echo "COOKIE_SECURE=false" >> deploy/.env.production
+      - name: Build images
+        run: docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production build
+      - name: Start the stack
+        run: |
+          C="docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production"
+          $C up -d postgres redis
+          $C run --rm migrate
+          $C up -d
+          BOOTSTRAP_PASSWORD='smoke-test-password-123' $C run --rm -T -e BOOTSTRAP_PASSWORD api \
+            python -m scripts.bootstrap tenant --slug janaki-tv --name "Janaki Television" \
+            --language en --admin-email editor@example.com --admin-name "Smoke Test"
+          $C run --rm -T -v "$PWD/deploy/feeds:/feeds:ro" api python -m scripts.bootstrap sources --tenant janaki-tv --file /feeds/approved.json
+          sleep 15
+          $C ps
+      - name: Sign in through Caddy and load the dashboard
+        run: |
+          set -x
+          curl -sf -o /dev/null http://localhost/login
+          code=$(curl -s -o /dev/null -w '%{http_code}' -c jar -X POST http://localhost/auth/login \
+            -H 'Origin: http://localhost' --data-urlencode tenant_slug=janaki-tv \
+            --data-urlencode email=editor@example.com --data-urlencode password=smoke-test-password-123 \
+            --data-urlencode next=/)
+          test "$code" = "303"
+          # An administrator must enrol two-factor first: that screen proves the session works.
+          curl -sf -b jar http://localhost/ | grep -q 'Set up two-factor sign-in'
+          docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production exec -T api \
+            python -c "import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:8000/health').read())"
+          bash deploy/backup.sh
+          ls -la backups/
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production logs --tail 80

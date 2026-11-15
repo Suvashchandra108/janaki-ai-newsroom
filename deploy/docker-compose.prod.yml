@@ -1,0 +1,112 @@
+# Newsroom production stack for ONE small Linux server (Hetzner CX23: 2 vCPU, 4 GB).
+# Install and update with deploy/install.sh and deploy/update.sh (see docs/DEPLOYMENT.md).
+#   C="docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production"
+# Only Caddy is reachable from the internet (80/443). The API, database and Redis stay on the
+# private Docker network.
+name: janaki-newsroom
+
+x-backend: &backend
+  build: { context: ../backend }
+  image: janaki-newsroom-backend:latest
+  restart: unless-stopped
+  env_file: .env.production
+  environment: &backend-env
+    ENVIRONMENT: production
+    DATABASE_URL: postgresql+psycopg://janaki_app:${DB_APP_PASSWORD:?set DB_APP_PASSWORD}@postgres:5432/janaki
+    DATABASE_OWNER_URL: postgresql+psycopg://janaki_owner:${DB_OWNER_PASSWORD:?set DB_OWNER_PASSWORD}@postgres:5432/janaki
+    REDIS_URL: redis://redis:6379/0
+    STORAGE_BACKEND: local
+    STORAGE_LOCAL_ROOT: /data/media
+  volumes:
+    - media:/data/media
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD}
+      DB_OWNER_PASSWORD: ${DB_OWNER_PASSWORD}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d janaki']
+      interval: 10s
+      retries: 10
+    deploy: { resources: { limits: { memory: 600m } } }
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory', '128mb']
+    volumes: [redis:/data]
+    deploy: { resources: { limits: { memory: 200m } } }
+
+  migrate:
+    <<: *backend
+    restart: 'no'
+    command: ['alembic', 'upgrade', 'head']
+    depends_on: { postgres: { condition: service_healthy } }
+
+  api:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      FORWARDED_ALLOW_IPS: '*'
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_started }
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy: { resources: { limits: { memory: 500m } } }
+
+  worker:
+    <<: *backend
+    command: ['celery', '-A', 'app.worker', 'worker', '--loglevel=info', '--concurrency=2']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_started }
+    deploy: { resources: { limits: { memory: 700m } } }
+
+  beat:
+    <<: *backend
+    command: ['celery', '-A', 'app.worker', 'beat', '--loglevel=info', '--schedule=/tmp/celerybeat-schedule']
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_started }
+    deploy: { resources: { limits: { memory: 200m } } }
+
+  dashboard:
+    build: { context: ../frontend }
+    image: janaki-newsroom-dashboard:latest
+    restart: unless-stopped
+    environment:
+      NEWSROOM_API_URL: http://api:8000
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    depends_on: [api]
+    deploy: { resources: { limits: { memory: 400m } } }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      NEWSROOM_DOMAIN: ${NEWSROOM_DOMAIN:?set NEWSROOM_DOMAIN}
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [dashboard]
+
+volumes:
+  pgdata:
+  redis:
+  media:
+  caddy_data:
+  caddy_config:

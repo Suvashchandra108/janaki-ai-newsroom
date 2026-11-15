@@ -9,3 +9,5 @@ htmlcov/
 node_modules/
 .next/
 var/
+deploy/.env.production
+backups/
