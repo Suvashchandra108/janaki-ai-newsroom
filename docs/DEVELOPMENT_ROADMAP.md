@@ -24,11 +24,21 @@ Each phase ends at a checkpoint: tests actually run, acceptance criteria reviewe
 3. **Rate limiting split.** Per-account lockout ships in Phase 1; IP/token-bucket limiting ships with quota enforcement in Phase 8 (shared Redis infrastructure).
 4. **Celery chosen over Dramatiq** for its built-in beat scheduler and wider operational tooling.
 
-## Next steps
+## Next steps (status 16 Nov 2026)
 
-1. **Owner review** of the dashboard (screenshots in the 15 Nov checkpoint) and of JanakiTelevision PR #1.
-2. **Phase 8 or 9**, owner's choice: commercial features (plans, metering, billing) or production deployment (server, HTTPS, backups, monitoring). The dashboard needs HTTPS in production (its cookies are `Secure`).
-3. Small pre-production tasks: pin the Gemini model id; build the Docker images in CI.
+**Go-live of website delivery — in progress.**
+
+- Done: JanakiTelevision PR #1 merged (15 Nov) and **live** on janakitelevision.com (`/api/integrations/me` answers). The website runs on AWS EC2 `janaki-tv-1`, Mumbai (35.154.72.14, 2 GB — too small to share); DNS at Namecheap.
+- Done: newsroom production kit in `deploy/` (install, connect-website, update, backup), proven by CI job `deploy-smoke`.
+- Hetzner abandoned: its sign-up looped on the bot check. **Decision 16 Nov: newsroom on its own AWS EC2 server in Mumbai.**
+- Next session:
+  1. Owner signs in to the AWS console.
+  2. Launch EC2 `janaki-newsroom`: Ubuntu 24.04, t3.small, 25 GB gp3, security group 22/80/443. Owner confirms AWS's price first.
+  3. Run `deploy/install.sh` through EC2 Instance Connect. Owner types the Gemini key and the admin password. The private repo is cloned with a read-only deploy key.
+  4. Namecheap A record `newsroom` → the instance's public IP. Elastic IP recommended, so the address survives restarts.
+  5. Owner creates the website integration "AI newsroom" (key kept private), then runs `bash deploy/connect-website.sh`. Automatic hourly delivery is on (owner's choice).
+  6. Check that the first draft arrives in the website's English drafts.
+- Later: Phase 8 or 9, pin the Gemini model id.
 
 ## Phase 6 notes
 
